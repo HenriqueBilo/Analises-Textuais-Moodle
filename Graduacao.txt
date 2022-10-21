@@ -1,0 +1,18 @@
+Titulo do Trabalho de Graduação:
+
+Ferramenta para análise de sentimentos em postagens de alunos no moodle 
+
+
+Resumo do Trabalho de Graduação:
+
+A mineração de texto é um processo que utiliza algoritmos capazes de analisar coleções de
+documentos texto. Os dados serão obtidos através do moodle em fóruns, mensagens diretas e
+chats gerais. Com isso, será extraído desses dados conhecimentos valiosos para tentarmos entender como o aluno está
+se sentindo ao decorrer dos cursos.
+
+Dados textuais de alunos no moodle, obtidos em fóruns, mensagens diretas ou em chats
+gerais
+
+O objetivo desse trabalho será obter e analisar os textos que os alunos postam em fóruns, chats
+e outros meios de comunicação do moodle. Após obter esses textos, será feito uma análise de sentimentos, 
+toxicidade, entre outras coisas.
