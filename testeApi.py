@@ -928,7 +928,7 @@ def criaGraficoMetricas():
 
 if __name__ == '__main__':
 
-    '''# Pega informações do usuário
+    # Pega informações do usuário
 
     listaCursosUsuario, idUsuarioBuscado = pegaInformacoesUsuario()
 
@@ -967,7 +967,7 @@ if __name__ == '__main__':
 
     retornoMensagens = pd.read_csv('./dados_mensagens.csv', sep=';')
 
-    analiseMetricas(retornoMensagens.loc[:].values)'''
+    analiseMetricas(retornoMensagens.loc[:].values)
     
     #Teste 4 INICIO
 
