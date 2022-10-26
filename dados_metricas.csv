@@ -6,6 +6,6 @@ idUsuario;mensagem;data;polaridade;NRC_EMOTIONS;GooglePerspectiveMetrics
 5;fica salvo?;05/07/2022;0.0;None;Profanidade:0.1644113*Toxidade Grave:0.13604486*Ataque de Identidade:0.025750063*Ameaça:0.10386095*Toxidade:0.099415205
 2;oi;10/10/2022;0.0;None;Profanidade:0.010675205*Toxidade Grave:0.027388083*Ataque de Identidade:0.022875817*Ameaça:0.07751938*Toxidade:0.012811388
 2;agora sim um novo chat;15/07/2022;0.296;trust:1.0*positive:0.4;Profanidade:0.032877468*Toxidade Grave:0.1134216*Ataque de Identidade:0.09611469*Ameaça:0.23915432*Toxidade:0.099415205
-2;Oi Roberto!;06/07/2022;0.0;trust:0.3*positive:0.8;Profanidade:0.010507881*Toxidade Grave:0.023386918*Ataque de Identidade:0.022673182*Ameaça:0.07751938*Toxidade:0.012811388
-3;Muito obrigado, professor!;10/06/2022;0.4926;trust:0.5*positive:0.5;Profanidade:0.005884503*Toxidade Grave:0.0143262595*Ataque de Identidade:0.022341385*Ameaça:0.07751938*Toxidade:0.012811388
+2;Oi Roberto!;06/07/2022;-0.5;trust:0.3*positive:0.8*fear:0.4*anger:0.1*anticipation:0.2*surprise:1.0;Profanidade:0.010507881*Toxidade Grave:0.023386918*Ataque de Identidade:0.022673182*Ameaça:0.07751938*Toxidade:0.012811388
+3;Muito obrigado, professor!;10/06/2022;0.4926;trust:0.5*negative:0.3*sadness:0.45*disgust:0.8*joy:0.1;Profanidade:0.005884503*Toxidade Grave:0.0143262595*Ataque de Identidade:0.022341385*Ameaça:0.07751938*Toxidade:0.012811388
 5;OlÃƒÆ’Ã‚Â¡ a todos sejam muito bem vindos;15/06/2022;0.2732;trust:0.8*positive:0.25;Profanidade:0.05895193*Toxidade Grave:0.13884786*Ataque de Identidade:0.15141243*Ameaça:0.16374269*Toxidade:0.05268469

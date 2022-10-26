@@ -7,6 +7,8 @@ import os
 import pandas as pd
 from datetime import datetime
 
+from tangled_up_in_unicode import uppercase
+
 from leia import SentimentIntensityAnalyzer  # LeIA
 
 import textstat  # Textstat - pip install textstat - para instalar
@@ -743,12 +745,16 @@ def criaGraficoMetricas():
                 if nrc_emocao not in array_nome_nrc_emocoes:
                     array_nome_nrc_emocoes.append(nrc_emocao)
                 array_valores_aux.append(dados[nrc_emocao])
+
+        while len(array_valores_aux) < 10:
+            array_valores_aux.append(0)
         array_valores_nrc_emocoes.append(array_valores_aux)
 
     #NRC - Tratamento valores de cada emoção (1 coluna pra cada)
     df_aux = pd.DataFrame(array_valores_nrc_emocoes,columns=array_nome_nrc_emocoes)
-    df['trust'] = pd.to_numeric(df_aux['trust'].replace(np.nan,0))
-    df['positive'] = pd.to_numeric(df_aux['positive'].replace(np.nan,0))
+    for emocao_nrc in array_nome_nrc_emocoes:
+        df[emocao_nrc] = pd.to_numeric(df_aux[emocao_nrc].replace(np.nan,0))
+    #df['positive'] = pd.to_numeric(df_aux['positive'].replace(np.nan,0))
 
     #NRC - Adiciona uma coluna contendo todos os nomes das emoções
     data = {'NOMES_NRC_EMOCOES': array_nome_nrc_emocoes}
@@ -762,6 +768,22 @@ def criaGraficoMetricas():
             df.at[i,'TEM_TRUST'] = 'trust'
         if linha.positive != '0':
             df.at[i,'TEM_POSITIVE'] = 'positive'
+        if linha.fear != '0':
+            df.at[i,'TEM_FEAR'] = 'fear'
+        if linha.anger != '0':
+            df.at[i,'TEM_ANGER'] = 'anger'
+        if linha.anticipation != '0':
+            df.at[i,'TEM_ANTICIPATION'] = 'anticipation'
+        if linha.surprise != '0':
+            df.at[i,'TEM_SURPRISE'] = 'surprise'
+        if linha.negative != '0':
+            df.at[i,'TEM_NEGATIVE'] = 'negative'
+        if linha.sadness != '0':
+            df.at[i,'TEM_SADNESS'] = 'sadness'
+        if linha.disgust != '0':
+            df.at[i,'TEM_DISGUST'] = 'disgust'
+        if linha.joy != '0':
+            df.at[i,'TEM_JOY'] = 'joy'
 
     '''df = df.sort_values(['data', 'trust'], ascending=[True, True])
     df = df.reset_index()
@@ -785,18 +807,30 @@ def criaGraficoMetricas():
 
     app.layout = html.Div([
 
-        html.Div([
-            dcc.Graph(id='grafico_polaridade')
+        #Primeiro gráfico
+
+         html.Div([
+            dcc.Graph(
+            figure={
+                'data': [
+                    {'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': 'SF'},
+                    #{'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': u'Montréal'},
+                ],
+                'layout': {
+                    'title': 'Visualização da Métrica Polaridade por Aluno'
+                }
+            },
+            id='grafico_polaridade'
+        )
         ],className='eight columns'),
 
         html.Div([
-
             html.Br(),
             html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'center'}),
-            dcc.Dropdown(id='cboAlunosPolaridade',
+            dcc.Dropdown(id='cboAlunoPolaridade',
                 options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
                 value=df['idUsuario'][0],
-                multi=True,
+                multi=False,
                 disabled=False,
                 clearable=True,
                 searchable=True,
@@ -807,9 +841,9 @@ def criaGraficoMetricas():
                 persistence_type='memory'),
         ],className='three columns'),
 
-        html.Div([
-            html.Br()
-        ],className=''),
+        #Fim primeiro gráfico
+
+        #Segundo Gráfico
 
         html.Div([
             dcc.Graph(id='grafico_metricas')
@@ -844,14 +878,14 @@ def criaGraficoMetricas():
                 style={'width':"90%"},
                 persistence='string',
                 persistence_type='memory'),
-
-            
+     
         ],className='three columns'),
 
-
+        #Fim segundo gráfico
+     
     ])
 
-    @app.callback(
+    '''@app.callback(
         Output('grafico_polaridade','figure'),
         [Input('cboAlunosPolaridade','value')]#,
         #Input('cuisine_two','value'),
@@ -879,42 +913,91 @@ def criaGraficoMetricas():
                         xaxis={'title':'DATA'},
                         title={'text':'Métricas De Cada Aluno (Polaridade)',
                         'font':{'size':28},'x':0.5,'xanchor':'center'})
+        return fig'''
+
+    @app.callback(
+        Output('grafico_polaridade','figure'),
+        [Input('cboAlunoPolaridade','value')]
+    )
+
+    def atualiza_grafico_polaridade(aluno):
+        dff = df[df['idUsuario'] == aluno]
+        #fig = px.bar(df[mask], x='data', y='polaridade', color='idUsuario')
+        
+        cores = []
+        for polaridade in dff['polaridade']:
+            if float(polaridade) >= 0:
+                cores.append('green')
+            else:
+                cores.append('red')
+
+        fig = {
+            'data': 
+            [
+                {'x': dff['data'], 'y': dff['polaridade'], 'type': 'bar', 'marker' : { 'color' : cores}},
+                #{'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': u'Montréal'},
+            ],
+            'layout': {
+                'title': 'Visualização da Métrica \'Polaridade\' por Aluno',
+                'xaxis': {
+                    'title': 'DATA'
+                },
+                'yaxis': {
+                    'title': 'POLARIDADE'
+                },
+            }
+        }
         return fig
 
     @app.callback(
         Output('grafico_metricas','figure'),
-        [Input('cboNrcEmotion','value')]#,
-        #Input('cboAlunos','value')#,]#,
-        #Input('cuisine_three','value')]
+        [Input('cboAlunos','value'),
+        Input('cboNrcEmotion','value')]
     )
 
-    def build_graph2(nrc_emotion):
+    def atualiza_grafico_metricas_nrc(alunos, nrc_emotion):
+        dff_aux_alunos = ''
 
-        filtraPelaColuna = ''
-        colorPelaColuna = ''
-
-        '''if isinstance(aluno, int): #Caso for apenas um número
-            dff=df[(df['idUsuario']==aluno)]
+        if isinstance(alunos, int): #Caso for apenas um número
+            dff_aux_alunos = df['idUsuario']==alunos
         else: #Caso forem múltiplas opções selecionadas
-            if len(aluno) == 1: #Se tiver apenas uma opção selecionada
-                dff=df[(df['idUsuario']==aluno[0])]
+            if len(alunos) == 1: #Se tiver apenas uma opção selecionada
+                dff_aux_alunos = df['idUsuario']==alunos[0]
             else:
-                if len(aluno) == 0: #Caso nenhuma for selecionada, não exibe nada
-                    aluno = 0
-                    dff=df[(df['idUsuario']==aluno)]
+                if len(alunos) == 0: #Caso nenhuma for selecionada, não exibe nada
+                    alunos = 0
+                    dff_aux_alunos = df['idUsuario']==alunos
                 else: #Caso tenha mais de uma, filtra
-                    dff=df[(df['idUsuario']==aluno[0])|
-                        (df['idUsuario']==aluno[1])]#|
+                    alunos_selecionados_df = []
+                    vet_bool = []
+                    for i, aluno in enumerate(alunos):
+                        if i == 0:
+                            vet_bool = (df['idUsuario']==aluno).values
+                        else:
+                            new_vet_bool = (df['idUsuario']==aluno).values
+                            for indice, elem in enumerate(vet_bool):
+                                if (new_vet_bool[indice] != vet_bool[indice]) and new_vet_bool[indice] == True:
+                                    vet_bool[indice] = True
+
+                        #alunos_selecionados_df.append(df['idUsuario']==aluno)
+
+                    dff_aux_alunos = vet_bool
+                    '''for data in alunos_selecionados_df:
+                        for linha in data.iteritems():
+                            dff_aux_alunos.append(linha)
+                    dff_aux_alunos=df[(df['idUsuario']==alunos[0])|
+                        (df['idUsuario']==alunos[1])]#|
                         #(df['toxidade']==third_cuisine)]'''
-        if nrc_emotion == 'trust':
-            filtraPelaColuna = 'trust'
-            colorPelaColuna = 'TEM_TRUST'
-            dff=df[(df['TEM_TRUST']==nrc_emotion)]
-        if nrc_emotion == 'positive':
-            filtraPelaColuna = 'positive'
-            colorPelaColuna = 'TEM_POSITIVE'
-            dff=df[(df['TEM_POSITIVE']==nrc_emotion)]
-        
+
+
+        dff=df[dff_aux_alunos]
+
+        #PARTE DE ALUNOS GENÉRICA OK, FAZER A JUNÇÃO COM O FILTRO DE EMOÇÃO
+
+        # CUIDADO !!! NÃO APAGAR, É A PARTE QUE FILTRA POR EMOÇÃO
+        filtraPelaColuna = nrc_emotion
+        colorPelaColuna = 'TEM_' + nrc_emotion.upper()
+        #dff=df[(df['TEM_' + nrc_emotion.upper()]==nrc_emotion)]
 
         fig = px.line(dff, x='data', y=filtraPelaColuna, color=colorPelaColuna, height=600)
         fig.update_layout(yaxis={'title':filtraPelaColuna.upper()},
