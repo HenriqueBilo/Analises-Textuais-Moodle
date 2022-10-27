@@ -41,6 +41,8 @@ from dash.dependencies import Input, Output, State
 
 import webbrowser
 
+import plotly.graph_objs as go
+
 # Module variables to connect to moodle api
 KEY = ""
 URL = "http://localhost"  # "https://moodle.site.com"
@@ -639,7 +641,7 @@ def adicionaNovaColuna(input_file, output_file, coluna_nova, array_valores_novos
 
             csv_writer.writerow(linha)
 
-def tratamentoArquivoFinal():
+'''def tratamentoArquivoFinal():
     #df = pd.read_csv('./dados_metricas.csv', sep=';', index_col=False)
 
     #df['data'] = pd.to_datetime(df['data'])
@@ -666,7 +668,7 @@ def tratamentoArquivoFinal():
         metrica_e_valor = linha.split('*')
         for metrica in metrica_e_valor:
             metrica_nome = metrica.split(':')[0]
-            metrica_valor = metrica.split(':')[1]
+            metrica_valor = metrica.split(':')[1]'''
 
     
 def analiseMetricas(retornoMensagens):
@@ -689,7 +691,7 @@ def analiseMetricas(retornoMensagens):
     
     deletaArquivosAuxiliares()
 
-    tratamentoArquivoFinal()
+    #tratamentoArquivoFinal()
 
 #Função para criar o gráfico principal
 
@@ -736,6 +738,8 @@ def criaGraficoMetricas():
     array_nome_nrc_emocoes = []
     array_valores_nrc_emocoes = []
 
+    dict_nrc_emocoes = {}
+
     for dados in retorno_nrc_emocoes:
         array_valores_aux = []
         if len(dados) != 0:
@@ -744,22 +748,50 @@ def criaGraficoMetricas():
                 #dados[nrc_emocao] - Valor (string)
                 if nrc_emocao not in array_nome_nrc_emocoes:
                     array_nome_nrc_emocoes.append(nrc_emocao)
-                array_valores_aux.append(dados[nrc_emocao])
+                    dict_nrc_emocoes[nrc_emocao] = []
+                #array_valores_aux.append(dados[nrc_emocao])
 
-        while len(array_valores_aux) < 10:
-            array_valores_aux.append(0)
-        array_valores_nrc_emocoes.append(array_valores_aux)
+    #Pra fechar o numero de linhas do dataframe
+    while len(array_nome_nrc_emocoes) < len(df.index):
+        array_nome_nrc_emocoes.append('trust')
+
+        #while len(array_valores_aux) < 10:
+            #array_valores_aux.append(0)
+        #array_valores_nrc_emocoes.append(array_valores_aux)
+
+    for i, dados in enumerate(retorno_nrc_emocoes):
+        if len(dados) != 0:
+            for nrc_emocao in dados:
+                #nrc_emocao - Nome
+                #dados[nrc_emocao] - Valor (string)
+                #if nrc_emocao not in array_nome_nrc_emocoes:
+                    #array_nome_nrc_emocoes.append(nrc_emocao)
+                dict_nrc_emocoes[nrc_emocao].append(float(dados[nrc_emocao]))
+            for emocao in array_nome_nrc_emocoes:
+                while len(dict_nrc_emocoes[emocao]) < i + 1:
+                    dict_nrc_emocoes[emocao].append(np.nan)
+            
+        else:
+            for chave in dict_nrc_emocoes.keys():
+                #Valor dict_nrc_emocoes[chave]
+                dict_nrc_emocoes[chave].append(np.nan)
+                
+    for chave in dict_nrc_emocoes.keys():
+        while len(dict_nrc_emocoes[chave]) < 10:
+            dict_nrc_emocoes[chave].append(np.nan)
+        #array_valores_nrc_emocoes.append(dict_nrc_emocoes[chave])
+        
 
     #NRC - Tratamento valores de cada emoção (1 coluna pra cada)
-    df_aux = pd.DataFrame(array_valores_nrc_emocoes,columns=array_nome_nrc_emocoes)
+    #df_aux = pd.DataFrame(array_valores_nrc_emocoes,columns=array_nome_nrc_emocoes)
     for emocao_nrc in array_nome_nrc_emocoes:
-        df[emocao_nrc] = pd.to_numeric(df_aux[emocao_nrc].replace(np.nan,0))
+        df[emocao_nrc] = dict_nrc_emocoes[emocao_nrc]      #pd.to_numeric(df_aux[emocao_nrc].replace(np.nan,0))
     #df['positive'] = pd.to_numeric(df_aux['positive'].replace(np.nan,0))
 
     #NRC - Adiciona uma coluna contendo todos os nomes das emoções
     data = {'NOMES_NRC_EMOCOES': array_nome_nrc_emocoes}
-    df_aux = pd.DataFrame(data)
-    df['NOMES_NRC_EMOCOES'] = df_aux['NOMES_NRC_EMOCOES']
+    #df_aux = pd.DataFrame(data)
+    df['NOMES_NRC_EMOCOES'] = data['NOMES_NRC_EMOCOES']  #df_aux['NOMES_NRC_EMOCOES']
     #df['NOMES_NRC_EMOCOES'] = df['NOMES_NRC_EMOCOES'].replace(np.nan, 'None')
 
     #NRC - Cria colunas para saber qual linha tem determinada emoção
@@ -789,7 +821,7 @@ def criaGraficoMetricas():
     df = df.reset_index()
     df = df.drop(labels='index', axis=1)'''
 
-    df = df.drop(labels='mensagem', axis=1) #Teste
+    #df = df.drop(labels='mensagem', axis=1) #Teste
     df = df.drop(labels='NRC_EMOTIONS', axis=1) #Teste
     df = df.drop(labels='GooglePerspectiveMetrics', axis=1) #Teste
 
@@ -885,36 +917,6 @@ def criaGraficoMetricas():
      
     ])
 
-    '''@app.callback(
-        Output('grafico_polaridade','figure'),
-        [Input('cboAlunosPolaridade','value')]#,
-        #Input('cuisine_two','value'),
-        #Input('cuisine_three','value')]
-    )
-
-    def build_graph(aluno):
-
-        if isinstance(aluno, int): #Caso for apenas um número
-            dff=df[(df['idUsuario']==aluno)]
-        else: #Caso forem múltiplas opções selecionadas
-            if len(aluno) == 1: #Se tiver apenas uma opção selecionada
-                dff=df[(df['idUsuario']==aluno[0])]
-            else:
-                if len(aluno) == 0: #Caso nenhuma for selecionada, não exibe nada
-                    aluno = 0
-                    dff=df[(df['idUsuario']==aluno)]
-                else: #Caso tenha mais de uma, filtra
-                    dff=df[(df['idUsuario']==aluno[0])|
-                        (df['idUsuario']==aluno[1])]#|
-                        #(df['toxidade']==third_cuisine)]
-
-        fig = px.line(dff, x='data', y='polaridade', color='idUsuario', height=600)
-        fig.update_layout(yaxis={'title':'POLARIDADE'},
-                        xaxis={'title':'DATA'},
-                        title={'text':'Métricas De Cada Aluno (Polaridade)',
-                        'font':{'size':28},'x':0.5,'xanchor':'center'})
-        return fig'''
-
     @app.callback(
         Output('grafico_polaridade','figure'),
         [Input('cboAlunoPolaridade','value')]
@@ -945,8 +947,14 @@ def criaGraficoMetricas():
                 'yaxis': {
                     'title': 'POLARIDADE'
                 },
+                'font': {
+                    'size': 15,
+                    'x': 0.5,
+                    'xanchor': 'center'
+                },
             }
         }
+
         return fig
 
     @app.callback(
@@ -979,31 +987,35 @@ def criaGraficoMetricas():
                                 if (new_vet_bool[indice] != vet_bool[indice]) and new_vet_bool[indice] == True:
                                     vet_bool[indice] = True
 
-                        #alunos_selecionados_df.append(df['idUsuario']==aluno)
-
                     dff_aux_alunos = vet_bool
-                    '''for data in alunos_selecionados_df:
-                        for linha in data.iteritems():
-                            dff_aux_alunos.append(linha)
-                    dff_aux_alunos=df[(df['idUsuario']==alunos[0])|
-                        (df['idUsuario']==alunos[1])]#|
-                        #(df['toxidade']==third_cuisine)]'''
 
-
-        dff=df[dff_aux_alunos]
-
-        #PARTE DE ALUNOS GENÉRICA OK, FAZER A JUNÇÃO COM O FILTRO DE EMOÇÃO
-
-        # CUIDADO !!! NÃO APAGAR, É A PARTE QUE FILTRA POR EMOÇÃO
         filtraPelaColuna = nrc_emotion
         colorPelaColuna = 'TEM_' + nrc_emotion.upper()
-        #dff=df[(df['TEM_' + nrc_emotion.upper()]==nrc_emotion)]
+        dff=df[ dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion)]
 
-        fig = px.line(dff, x='data', y=filtraPelaColuna, color=colorPelaColuna, height=600)
+        #Teste Data em modo DateTime
+        #dff['data'] = pd.to_datetime(dff['data'], format='%d/%m/%Y')
+        #dff = dff.sort_values(by=['data'])
+        #Teste
+
+        dff = dff[dff[filtraPelaColuna].notnull()]
+
+        fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
+        #markers=True ou #text='mensagem' #Pra LINE
+        #hover_data={'mensagem'}
+        #scatter
+        #Teste
+
+        #fig.update_traces(marker=dict(size=12,line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
+        fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
+        #opacity=0.5
+        #
+        
         fig.update_layout(yaxis={'title':filtraPelaColuna.upper()},
                         xaxis={'title':'DATA'},
                         title={'text':'Métricas De Cada Aluno (Teste)',
-                        'font':{'size':28},'x':0.5,'xanchor':'center'})
+                        'font':{'size':20},'x':0.5,'xanchor':'center'},
+                        hovermode='x')
         return fig
 
     webbrowser.open('http://127.0.0.1:8050')
@@ -1052,28 +1064,5 @@ if __name__ == '__main__':
 
     analiseMetricas(retornoMensagens.loc[:].values)
     
-    #Teste 4 INICIO
-
     criaGraficoMetricas()
-
-    #
-
-    '''dcc.Dropdown(id='cuisine_two',
-    options=[{'label':x, 'value':x} for x in df.sort_values('CUISINE DESCRIPTION')['CUISINE DESCRIPTION'].unique()],
-    value='Asian',
-    multi=False,
-    clearable=False,
-    persistence='string',
-    persistence_type='session'),
-
-    dcc.Dropdown(id='cuisine_three',
-    options=[{'label':x, 'value':x} for x in df.sort_values('CUISINE DESCRIPTION')['CUISINE DESCRIPTION'].unique()],
-    value='Donuts',
-    multi=False,
-    clearable=False,
-    persistence='string',
-    persistence_type='local'),'''
-
-
-    #FIM teste 4
 
