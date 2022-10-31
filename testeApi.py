@@ -44,10 +44,9 @@ import webbrowser
 import plotly.graph_objs as go
 
 # Module variables to connect to moodle api
-KEY = "" 
+KEY = ""
 URL = "http://localhost"  # "https://moodle.site.com"
 ENDPOINT = "/webservice/rest/server.php"
-
 
 def rest_api_parameters(in_args, prefix='', out_dict=None):
     """Transform dictionary/array structure to a flat dictionary, with key names
@@ -246,15 +245,14 @@ class Chats():
                         dataMensagemChatObject = datetime.fromtimestamp(mensagem['timestamp'])
                         dataFormatada = str(dataMensagemChatObject.day).zfill(2) + '/' + str(dataMensagemChatObject.month).zfill(2) + '/' + str(dataMensagemChatObject.year)
 
-                        self.chat_messages[mensagem['id']] = conteudoMensagem + \
-                            '*' + str(mensagem['chatid']) + \
+                        self.chat_messages[mensagem['id']] = conteudoMensagem + '*' + str(mensagem['chatid']) + \
                             '*' + str(mensagem['userid']) + \
                             '*' + dataFormatada
 
         self.reescreve_csv_dados_chat_com_mensagens()
 
     def grava_csv_dados_chats(self, dados_chats):
-        with open('./dados_chats.csv', 'w', newline='') as csvfile:
+        with open('./dados_chats.csv', 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile, delimiter=';', quotechar='|')
             writer.writerow(['idchat', 'course', 'namechat', 'section'])
 
@@ -263,7 +261,7 @@ class Chats():
                                 chat['name'], chat['section']])
 
     def reescreve_csv_dados_chat_com_mensagens(self):
-        with open('./dados_chats.csv', 'r', newline='') as csvfile:
+        with open('./dados_chats.csv', 'r', newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='|')
             with open('./dados_chats_mensagens.csv', 'w', newline='', encoding='utf-8') as csvfilewrite:
                 writer = csv.writer(csvfilewrite, delimiter=';', quotechar='|')
@@ -403,7 +401,7 @@ def coletaMensagensDiretasAoProfessor(cursosArray, idUsuarioBuscado):
                             msg['useridfrom']) + '*' + str(msg['useridto']) + '*' + msg['fullmessage'] + '*' + dataFormatada
                         # directMessagesArray.append(msg['fullmessage'])
 
-    with open('./dados_mensagens_diretas.csv', 'w', newline='') as csvfile:
+    with open('./dados_mensagens_diretas.csv', 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.writer(csvfile, delimiter=';', quotechar='|')
         writer.writerow(['idmensagemdireta', 'useridfrom',
                         'useridto', 'fullmessage', 'data'])
@@ -629,7 +627,7 @@ def analisaGooglePerspectiveApi(retornoMensagens):
     chamaApiGooglePerspective(retornoMensagens)
 
 def adicionaNovaColuna(input_file, output_file, coluna_nova, array_valores_novos):
-    with open(input_file, 'r') as read_obj, \
+    with open(input_file, 'r', encoding='utf-8') as read_obj, \
         open(output_file, 'w', newline='', encoding='utf-8') as write_obj:
         csv_reader = csv.reader(read_obj, delimiter=';', quotechar='|')
         csv_writer = csv.writer(write_obj, delimiter=';', quotechar='|')
@@ -814,25 +812,35 @@ def criaGraficoMetricas():
 
     #NRC - Cria colunas para saber qual linha tem determinada emoção
     for i, linha in df.iterrows():
-        if linha.trust != '0':
+        if hasattr(linha, 'trust'):
             df.at[i,'TEM_TRUST'] = 'trust'
-        if linha.positive != '0':
+        #if linha.trust != '0':
+        if hasattr(linha, 'positive'):
+            #if linha.positive != '0':
             df.at[i,'TEM_POSITIVE'] = 'positive'
-        if linha.fear != '0':
+        if hasattr(linha, 'fear'):
+            #if linha.fear != '0':
             df.at[i,'TEM_FEAR'] = 'fear'
-        if linha.anger != '0':
+        if hasattr(linha, 'anger'):
+            #if linha.anger != '0':
             df.at[i,'TEM_ANGER'] = 'anger'
-        if linha.anticipation != '0':
+        if hasattr(linha, 'anticipation'):
+            #if linha.anticipation != '0':
             df.at[i,'TEM_ANTICIPATION'] = 'anticipation'
-        if linha.surprise != '0':
+        if hasattr(linha, 'surprise'):
+            #if linha.surprise != '0':
             df.at[i,'TEM_SURPRISE'] = 'surprise'
-        if linha.negative != '0':
+        if hasattr(linha, 'negative'):
+            #if linha.negative != '0':
             df.at[i,'TEM_NEGATIVE'] = 'negative'
-        if linha.sadness != '0':
+        if hasattr(linha, 'sadness'):
+            #if linha.sadness != '0':
             df.at[i,'TEM_SADNESS'] = 'sadness'
-        if linha.disgust != '0':
+        if hasattr(linha, 'disgust'):
+            #if linha.disgust != '0':
             df.at[i,'TEM_DISGUST'] = 'disgust'
-        if linha.joy != '0':
+        if hasattr(linha, 'joy'):
+            #if linha.joy != '0':
             df.at[i,'TEM_JOY'] = 'joy'
 
 
@@ -932,10 +940,6 @@ def criaGraficoMetricas():
     print(df[:])
     #tratamentoArquivoFinal()
 
-
-
-    #
-
     app = dash.Dash(__name__)
 
     app.layout = html.Div([
@@ -947,7 +951,6 @@ def criaGraficoMetricas():
             figure={
                 'data': [
                     {'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': 'SF'},
-                    #{'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': u'Montréal'},
                 ],
                 'layout': {
                     'title': 'Visualização da Métrica Polaridade por Aluno'
@@ -1011,6 +1014,16 @@ def criaGraficoMetricas():
                 style={'width':"90%"},
                 persistence='string',
                 persistence_type='memory'),
+
+            html.Br(),
+
+            html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
+            dcc.Textarea(
+                id='textAreaMsgs',
+                #value='TextArea contendo a mensagem selecionada',
+                value='',
+                style={'width': '90%', 'height': 300},
+            ),
      
         ],className='three columns'),
 
@@ -1059,12 +1072,16 @@ def criaGraficoMetricas():
         return fig
 
     @app.callback(
-        Output('grafico_metricas','figure'),
-        [Input('cboAlunos','value'),
+        [
+            Output('grafico_metricas','figure'),
+            Output('textAreaMsgs', 'value')
+        ],
+        [Input('grafico_metricas', 'clickData'),
+        Input('cboAlunos','value'),
         Input('cboNrcEmotion','value')]
     )
 
-    def atualiza_grafico_metricas_nrc(alunos, nrc_emotion):
+    def atualiza_grafico_metricas_nrc(clickData, alunos, nrc_emotion):
         dff_aux_alunos = ''
 
         if isinstance(alunos, int): #Caso for apenas um número
@@ -1117,7 +1134,28 @@ def criaGraficoMetricas():
                         title={'text':'Métricas De Cada Aluno (Teste)',
                         'font':{'size':20},'x':0.5,'xanchor':'center'},
                         hovermode='x')
-        return fig
+        
+        #Tratamento pro Click do ponto
+        gValorTexto = ''
+        vet_datas_mensagens_procuradas = []
+
+        if clickData is not None:
+            for indicePoints in range(len(clickData['points'])):
+                vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
+
+            vet_alunos_mensagens_verificadas = []
+            vet_mensagens_verificadas = []
+
+            for i, data_df in enumerate(dff['data'].values):
+                for data_mensagem_procurada in vet_datas_mensagens_procuradas:
+                    if data_mensagem_procurada == data_df:
+                        #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
+                        if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
+                            vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
+                            vet_mensagens_verificadas.append(dff['mensagem'].values[i])
+                            gValorTexto += 'Aluno ' + str(dff['idUsuario'].values[i]) + ': ' + dff['mensagem'].values[i] + '\n'
+        
+        return fig, gValorTexto
 
     webbrowser.open('http://127.0.0.1:8050')
     app.run_server(debug=False)
