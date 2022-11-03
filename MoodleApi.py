@@ -1,7 +1,7 @@
 from requests import post
 
 # Module variables to connect to moodle api
-KEY = "" 
+KEY = "52dd910d055efadfbadbadc6a1b1b18d"
 URL = "http://localhost"  # "https://moodle.site.com"
 ENDPOINT = "/webservice/rest/server.php"
 

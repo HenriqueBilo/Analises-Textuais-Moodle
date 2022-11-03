@@ -8,7 +8,7 @@ from Postagens import *
 
 import os
 
-class FuncoesDeColeta():
+class FuncoesAuxiliares():
     def pega_informacoes_usuario(self):
         usuario = input('Informe seu usuário: ')
 
@@ -88,3 +88,40 @@ class FuncoesDeColeta():
             for discussionId in discussion:
                 retorno = Postagens(discussionId)
                 postsArray.append(retorno.posts)
+
+    def adiciona_nova_coluna(self, input_file, output_file, coluna_nova, array_valores_novos):
+        with open(input_file, 'r', encoding='utf-8') as read_obj, \
+            open(output_file, 'w', newline='', encoding='utf-8') as write_obj:
+            csv_reader = csv.reader(read_obj, delimiter=';', quotechar='|')
+            csv_writer = csv.writer(write_obj, delimiter=';', quotechar='|')
+            for i, linha in enumerate(csv_reader):
+                if i == 0:
+                    linha.append(coluna_nova)
+                else:
+                    linha.append(array_valores_novos[i-1])
+
+                csv_writer.writerow(linha)
+
+    def grava_csv_unico(self, retornoMensagensChats, retornoMensagensDiretas, retornoMensagensPostsForuns):
+        with open('./dados_mensagens.csv', 'w', newline='', encoding='utf-8') as csvfilewrite:
+            writer = csv.writer(csvfilewrite, delimiter=';', quotechar='|')
+            writer.writerow(['idUsuario', 'mensagem', 'data'])
+
+            for msgChat in retornoMensagensChats:
+                writer.writerow([msgChat[5], msgChat[6],msgChat[7]])
+
+            for msgDireta in retornoMensagensDiretas:
+                writer.writerow([msgDireta[1], msgDireta[3],msgDireta[4]])
+
+            for msgPost in retornoMensagensPostsForuns:
+                writer.writerow([msgPost[3], msgPost[2],msgPost[4]])
+
+    def deleta_arquivos_auxiliares(self):
+        #Deleta arquivos auxiliares
+        array_arquivos_deletar = ['./dados_chats_mensagens.csv', './dados_cursos.csv', './dados_discussions.csv', './dados_foruns.csv', 
+                                './dados_mensagens_diretas.csv', './dados_posts.csv', './dados_usuario.csv', './dados_mensagens_aux_polaridade_e_nrc_emotions.csv',
+                                './dados_mensagens_aux_polaridade.csv', './dados_mensagens.csv']
+
+        for arquivo in array_arquivos_deletar:
+            if os.path.isfile(arquivo):
+                os.remove(arquivo)
