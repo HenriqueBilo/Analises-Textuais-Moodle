@@ -1,14 +1,42 @@
 import pandas as pd
+import os
 
 class LeituraCsvs():
     def __init__(self):
-        self.dados_usuario = pd.read_csv('./dados_usuario.csv', sep=';')
-        self.dados_posts = pd.read_csv('./dados_posts.csv', sep=';')
-        self.dados_mensagens_diretas = pd.read_csv('./dados_mensagens_diretas.csv', sep=';')
-        self.dados_foruns = pd.read_csv('./dados_foruns.csv', sep=';')
-        self.dados_discussions = pd.read_csv('./dados_discussions.csv', sep=';')
-        self.dados_cursos = pd.read_csv('./dados_cursos.csv', sep=';')
-        self.dados_chats_mensagens = pd.read_csv('./dados_chats_mensagens.csv', sep=';')
+        if os.path.exists('./data/dados_usuario.csv'):
+            self.dados_usuario = pd.read_csv('./data/dados_usuario.csv', sep='-')
+        else:
+            self.dados_usuario = pd.DataFrame()
+
+        if os.path.exists('./data/dados_posts.csv'):
+            self.dados_posts = pd.read_csv('./data/dados_posts.csv', sep='-')
+        else:
+            self.dados_posts = pd.DataFrame()
+
+        if os.path.exists('./data/dados_mensagens_diretas.csv'):
+            self.dados_mensagens_diretas = pd.read_csv('./data/dados_mensagens_diretas.csv', sep='-')
+        else:
+            self.dados_mensagens_diretas = pd.DataFrame()
+
+        if os.path.exists('./data/dados_foruns.csv'):
+            self.dados_foruns = pd.read_csv('./data/dados_foruns.csv', sep='-')
+        else:
+            self.dados_foruns = pd.DataFrame()
+
+        if os.path.exists('./data/dados_discussions.csv'):
+            self.dados_discussions = pd.read_csv('./data/dados_discussions.csv', sep='-')
+        else:
+            self.dados_discussions = pd.DataFrame()
+
+        if os.path.exists('./data/dados_cursos.csv'):
+            self.dados_cursos = pd.read_csv('./data/dados_cursos.csv', sep='-')
+        else:
+            self.dados_cursos = pd.DataFrame()
+
+        if os.path.exists('./data/dados_chats_mensagens.csv'):
+            self.dados_chats_mensagens = pd.read_csv('./data/dados_chats_mensagens.csv', sep='-')
+        else:
+            self.dados_chats_mensagens = pd.DataFrame()
 
     def get_dados_usuario(self):
         return self.dados_usuario

@@ -1,8 +1,8 @@
 from requests import post
 
 # Module variables to connect to moodle api
-KEY = ""
-URL = "http://localhost"  # "https://moodle.site.com"
+KEY = "473ac626e7ee6bdc85952bc8b93e0294" #52dd910d055efadfbadbadc6a1b1b18d
+URL = "https://moodle.ufrgs.br"  # "http://localhost" #
 ENDPOINT = "/webservice/rest/server.php"
 
 def rest_api_parameters(in_args, prefix='', out_dict=None):

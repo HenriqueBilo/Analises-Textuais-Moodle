@@ -23,7 +23,8 @@ class Chats():
                 for mensagem in mensagens_sessoes['messages']:
                     # Da pra pegar o 'userid' tbm
 
-                    conteudoMensagem = mensagem['message']
+                    #AK47
+                    conteudoMensagem = mensagem['message'].replace('\xa0', '').replace('\n', '').replace('-', '').replace('*', '')
                     if conteudoMensagem != 'enter' and conteudoMensagem != 'exit':
                         dataMensagemChatObject = datetime.fromtimestamp(mensagem['timestamp'])
                         dataFormatada = str(dataMensagemChatObject.day).zfill(2) + '/' + str(dataMensagemChatObject.month).zfill(2) + '/' + str(dataMensagemChatObject.year)
@@ -35,8 +36,8 @@ class Chats():
         self.reescreve_csv_dados_chat_com_mensagens()
 
     def grava_csv_dados_chats(self, dados_chats):
-        with open('./dados_chats.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';', quotechar='|')
+        with open('./data/dados_chats.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter='-')
             writer.writerow(['idchat', 'course', 'namechat', 'section'])
 
             for chat in dados_chats['chats']:
@@ -44,10 +45,10 @@ class Chats():
                                 chat['name'], chat['section']])
 
     def reescreve_csv_dados_chat_com_mensagens(self):
-        with open('./dados_chats.csv', 'r', newline='', encoding='utf-8') as csvfile:
-            reader = csv.reader(csvfile, delimiter=';', quotechar='|')
-            with open('./dados_chats_mensagens.csv', 'w', newline='', encoding='utf-8') as csvfilewrite:
-                writer = csv.writer(csvfilewrite, delimiter=';', quotechar='|')
+        with open('./data/dados_chats.csv', 'r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile, delimiter='-')
+            with open('./data/dados_chats_mensagens.csv', 'w', newline='', encoding='utf-8') as csvfilewrite:
+                writer = csv.writer(csvfilewrite, delimiter='-')
 
                 for i, linha in enumerate(reader):
                     if i == 0:
