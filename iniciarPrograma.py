@@ -17,13 +17,15 @@ import timeit
 
 if __name__ == '__main__':
 
-    '''funcoes_auxiliares = FuncoesAuxiliares()
+    funcoes_auxiliares = FuncoesAuxiliares()
 
     # Pega informações do usuário
     lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
 
     # Seleciona o curso
     id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
+
+    print('\n ------ Processando... Aguarde um momento ------')
 
     # Pega as mensagens dos chats do curso
     cursos_array = funcoes_auxiliares.coleta_mensagens_chat_do_curso(id_disciplina_escolhida)
@@ -43,9 +45,7 @@ if __name__ == '__main__':
     #Preparação Dados para análise
     funcoes_auxiliares.grava_csv_unico(retornoMensagensChats.loc[:].values, retornoMensagensDiretas.loc[:].values, retornoMensagensPostsForuns.loc[:].values)
 
-    retornoMensagens = pd.read_csv('./dados_mensagens.csv', sep=';')
-
-    #start = timeit.default_timer()
+    retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
 
     #start = timeit.default_timer()
 

@@ -6,22 +6,22 @@ from datetime import datetime
 class Postagens():
     '''Retorna a lista de posts de uma determinada discussão'''
 
-    def __init__(self, discussionId):
-        posts_data = call('mod_forum_get_discussion_posts',
-                          discussionid=discussionId)
+    def __init__(self):
         self.posts = {}
+
+    def coleta_postagens(self, discussionId):
+        posts_data = call('mod_forum_get_discussion_posts', discussionid=discussionId)
         for post in posts_data['posts']:
             dataMensagemChatObject = datetime.fromtimestamp(post['timecreated'])
             dataFormatada = str(dataMensagemChatObject.day).zfill(2) + '/' + str(dataMensagemChatObject.month).zfill(2) + '/' + str(dataMensagemChatObject.year)
 
             soup = BeautifulSoup(post['message'], 'html.parser')
             self.posts[post['id']] = post['subject'] + '*' + \
-                soup.get_text() + '*' + str(post['author']['id']) + '*' + dataFormatada
-        self.grava_csv_posts()
+                soup.get_text().replace('\xa0', '').replace('\n', '').replace('-', '').replace('*', '') + '*' + str(post['author']['id']) + '*' + dataFormatada
 
     def grava_csv_posts(self):
-        with open('./dados_posts.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile, delimiter=';', quotechar='|')
+        with open('./data/dados_posts.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter='-')
             writer.writerow(['id', 'subject', 'message', 'autor', 'data'])
 
             for post in self.posts:
