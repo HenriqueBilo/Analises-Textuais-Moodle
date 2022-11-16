@@ -5,7 +5,7 @@ from FuncoesAuxiliares import *
 
 class GooglePerspectiveApi():
     def chama_api_google_perspective(self, retornoMensagens):
-        api_key = 'AIzaSyDPQd2sZX_8qvhon2LJ4SkVlOT5C-GKlHI'
+        api_key = ''
         url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=' + api_key)
 
         array_metricas = []
