@@ -15,8 +15,8 @@ class Discussoes():
         self.grava_csv_discussions()
 
     def grava_csv_discussions(self):
-        with open('./data/dados_discussions.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile, delimiter='-')
+        with open('./dados_discussions.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=';', quotechar='|')
             writer.writerow(['id', 'name', 'subject', 'message'])
 
             for discussion in self.discussions:

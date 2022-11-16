@@ -5,7 +5,7 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Input, Output, State
 import plotly.express as px
-from FuncoesAuxiliares import *
+
 import webbrowser
 from datetime import date
 
@@ -106,7 +106,7 @@ class GraficosMetricas():
 
         #Prepara os dados
 
-        df = pd.read_csv('./data/dados_metricas.csv', sep='-', index_col=False)
+        df = pd.read_csv('./dados_metricas.csv', sep=';', index_col=False)
 
         df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
         df = df.sort_values(by=['data'])
@@ -140,20 +140,18 @@ class GraficosMetricas():
             else:
                 for chave in dict_nrc_emocoes.keys():
                     dict_nrc_emocoes[chave].append(np.nan)
-
-        #TESTEEE    
-        '''for chave in dict_nrc_emocoes.keys():
+                    
+        for chave in dict_nrc_emocoes.keys():
             while len(dict_nrc_emocoes[chave]) < 10:
-                dict_nrc_emocoes[chave].append(np.nan)'''
+                dict_nrc_emocoes[chave].append(np.nan)
             
         #NRC - Tratamento valores de cada emoção (1 coluna pra cada)
         for emocao_nrc in array_nome_nrc_emocoes:
             df[emocao_nrc] = dict_nrc_emocoes[emocao_nrc]   
 
         #NRC - Adiciona uma coluna contendo todos os nomes das emoções
-        #TESTEEEE
-        #data = {'NOMES_NRC_EMOCOES': array_nome_nrc_emocoes}
-        #df['NOMES_NRC_EMOCOES'] = data['NOMES_NRC_EMOCOES']
+        data = {'NOMES_NRC_EMOCOES': array_nome_nrc_emocoes}
+        df['NOMES_NRC_EMOCOES'] = data['NOMES_NRC_EMOCOES']
 
         #NRC - Cria colunas para saber qual linha tem determinada emoção
         for i, linha in df.iterrows():
@@ -285,7 +283,7 @@ class GraficosMetricas():
                 html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'left'}),
                 dcc.Dropdown(id='cboAlunoPolaridade',
                     options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
-                    value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '', #Deve ta vindo vazio dai n funciona print ("par" if x % 2 == 0 else "impar")
+                    value=df['idUsuario'][0],
                     multi=False,
                     disabled=False,
                     clearable=True,
@@ -473,8 +471,7 @@ class GraficosMetricas():
         @app.callback(
             [
                 Output('grafico_metricas','figure'),
-                Output('textAreaMsgs', 'value'),
-                Output('alertaSemMensagens', 'displayed')
+                Output('textAreaMsgs', 'value')
             ],
             [
                 Input('grafico_metricas', 'clickData'),
@@ -522,11 +519,11 @@ class GraficosMetricas():
                 dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
                 dff = dff[dff[filtraPelaColuna].notnull()]
 
-                fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
-                #markers=True ou #text='mensagem' #Pra LINE
-                #hover_data={'mensagem'}
-                #scatter
-                #Teste
+            fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
+            #markers=True ou #text='mensagem' #Pra LINE
+            #hover_data={'mensagem'}
+            #scatter
+            #Teste
 
                 #fig.update_traces(marker=dict(size=12,line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
                 fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
@@ -543,29 +540,35 @@ class GraficosMetricas():
                 gValorTexto = ''
                 vet_datas_mensagens_procuradas = []
 
-                if clickData is not None:
-                    for indicePoints in range(len(clickData['points'])):
-                        vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
+            if clickData is not None:
+                for indicePoints in range(len(clickData['points'])):
+                    vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
 
-                    vet_alunos_mensagens_verificadas = []
-                    vet_mensagens_verificadas = []
+                vet_alunos_mensagens_verificadas = []
+                vet_mensagens_verificadas = []
 
-                    for i, data_df in enumerate(dff['data'].values):
-                        for data_mensagem_procurada in vet_datas_mensagens_procuradas:
-                            if data_mensagem_procurada == data_df:
-                                #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
-                                if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
-                                    vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
-                                    vet_mensagens_verificadas.append(dff['mensagem'].values[i])
-                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
-                                    #"\033[1m" + s + "\033[0m"
-                                    gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
+                for i, data_df in enumerate(dff['data'].values):
+                    for data_mensagem_procurada in vet_datas_mensagens_procuradas:
+                        if data_mensagem_procurada == data_df:
+                            #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
+                            if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
+                                vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
+                                vet_mensagens_verificadas.append(dff['mensagem'].values[i])
+                                gValorTexto += 'Aluno ' + str(dff['idUsuario'].values[i]) + ': ' + dff['mensagem'].values[i] + '\n\n\n'
                 return fig, gValorTexto, False
             else:
                 return '', '', True
 
+            #Teste Data em modo DateTime
+            #dff['data'] = pd.to_datetime(dff['data'], format='%d/%m/%Y')
+            #dff = dff.sort_values(by=['data'])
+            #Teste
+
+            
+
+            
+            
+            
+
         webbrowser.open('http://127.0.0.1:8050')
         app.run_server(debug=False)
-
-        funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.deleta_arquivos_auxiliares()

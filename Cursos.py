@@ -16,8 +16,8 @@ class Cursos():
                 self.courses[dados['id']] = dados['displayname']
 
     def grava_csv_dados_cursos(self, dados_cursos):
-        with open('./data/dados_cursos.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile, delimiter='-')
+        with open('./dados_cursos.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=';', quotechar='|')
             writer.writerow(['id', 'nome', 'categoria'])
 
             for curso in dados_cursos:
