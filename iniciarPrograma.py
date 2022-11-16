@@ -13,6 +13,8 @@ from FuncoesAuxiliares import *
 from AnalisesResultados import *
 from GraficosMetricas import *
 
+import timeit
+
 if __name__ == '__main__':
 
     funcoes_auxiliares = FuncoesAuxiliares()
@@ -45,9 +47,15 @@ if __name__ == '__main__':
 
     retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
 
+    #start = timeit.default_timer()
+
     analises_resultados = AnalisesResultados()
-    analises_resultados.analise_metricas(retornoMensagens.loc[:].values)
-    
+    analises_resultados.analise_metricas(retornoMensagens.loc[:].values)  #Problema de demora ta aqui, 46 segundos no curso de Excell
+
+    #end = timeit.default_timer()
+
+    #print('TESTEEEEEE: ' + str(end-start))
+
     graficos_resultados = GraficosMetricas()
     graficos_resultados.cria_grafico_metricas()
 

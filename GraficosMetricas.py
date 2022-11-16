@@ -7,6 +7,7 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 from FuncoesAuxiliares import *
 import webbrowser
+from datetime import date
 
 class GraficosMetricas():
     def formata_data(self, data):
@@ -219,20 +220,11 @@ class GraficosMetricas():
                 for chave in dict_google_emocoes.keys():
                     dict_google_emocoes[chave.upper()].append(np.nan)
                     
-        '''for chave in dict_google_emocoes.keys():
-            while len(dict_google_emocoes[chave]) < 10:
-                dict_google_emocoes[chave].append(np.nan)'''
-
         #GOOGLE_EMOTIONS - Tratamento valores de cada emoção (1 coluna pra cada)
         for emocao_google in array_nome_google_emocoes:
                 df[emocao_google] = dict_google_emocoes[emocao_google]   
 
-        #NRC - Adiciona uma coluna contendo todos os nomes das emoções
-        #TESTEEEE
-        #data = {'NOMES_GOOGLE_EMOCOES': array_nome_google_emocoes}
-        #df['NOMES_GOOGLE_EMOCOES'] = data['NOMES_GOOGLE_EMOCOES']
-
-        #NRC - Cria colunas para saber qual linha tem determinada emoção
+        #Google Perspective - Cria colunas para saber qual linha tem determinada emoção
         for i, linha in df.iterrows():
             if linha.AMEAÇA != '0':
                 df.at[i,'TEM_AMEAÇA'] = 'AMEAÇA'
@@ -255,33 +247,18 @@ class GraficosMetricas():
         data = {'EMOCOES_COMBO': array_nome_google_emocoes}
         df_combos['EMOCOES_COMBO'] = data['EMOCOES_COMBO']
 
-        #NRC - Cria colunas para saber qual linha tem determinada emoção
-        '''
-        for i, linha in df.iterrows():
-            if linha.trust != '0':
-                df.at[i,'TEM_TRUST'] = 'trust'
-            if linha.positive != '0':
-                df.at[i,'TEM_POSITIVE'] = 'positive'
-            if linha.fear != '0':
-                df.at[i,'TEM_FEAR'] = 'fear'
-            if linha.anger != '0':
-                df.at[i,'TEM_ANGER'] = 'anger'
-            if linha.anticipation != '0':
-                df.at[i,'TEM_ANTICIPATION'] = 'anticipation'
-            if linha.surprise != '0':
-                df.at[i,'TEM_SURPRISE'] = 'surprise'
-            if linha.negative != '0':
-                df.at[i,'TEM_NEGATIVE'] = 'negative'
-            if linha.sadness != '0':
-                df.at[i,'TEM_SADNESS'] = 'sadness'
-            if linha.disgust != '0':
-                df.at[i,'TEM_DISGUST'] = 'disgust'
-            if linha.joy != '0':
-                df.at[i,'TEM_JOY'] = 'joy' 
-        '''
-    
         #print(df[:])
-        #tratamentoArquivoFinal()
+
+        #Para utilizar no filtro de data
+        if len(df['data']) > 0:
+            dataInicial = df['data'][0].split('/')
+            dataInicial = date(int(dataInicial[2]), int(dataInicial[1]), int(dataInicial[0]))
+
+            dataFinal = df['data'][len(df['data']) - 1].split('/')
+            dataFinal = date(int(dataFinal[2]), int(dataFinal[1]), int(dataFinal[0]))
+        else:
+            dataInicial = ''
+            dataFinal = ''
 
         app = dash.Dash(__name__)
 
@@ -305,7 +282,7 @@ class GraficosMetricas():
 
             html.Div([
                 html.Br(),
-                html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'center'}),
+                html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'left'}),
                 dcc.Dropdown(id='cboAlunoPolaridade',
                     options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
                     value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '', #Deve ta vindo vazio dai n funciona print ("par" if x % 2 == 0 else "impar")
@@ -318,75 +295,126 @@ class GraficosMetricas():
                     style={'width':"90%"},
                     persistence='string',
                     persistence_type='memory'),
+
+                html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                dcc.DatePickerRange(
+                    id="dateRangePolaridade",
+                    min_date_allowed='',
+                    max_date_allowed='',
+                    start_date=dataInicial,
+                    end_date=dataFinal,
+                    display_format='DD/MM/YYYY'
+                ),
+
+                html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
+                dcc.Textarea(
+                    id='textAreaMsgsPolaridade',
+                    value='',
+                    style={'width': '90%', 'height': 200},
+                ),
+                
             ],className='three columns'),
+
+            html.Div([
+                html.Br()
+            ], className='twelve columns border-bottom'),
 
             #Fim primeiro gráfico
 
             #Segundo Gráfico
 
             html.Div([
+                html.Div([
+                    html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.Dropdown(id='cboAlunos',
+                        options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
+                        value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '',
+                        multi=True,
+                        disabled=False,
+                        clearable=True,
+                        searchable=True,
+                        placeholder='Escolha um Aluno...',
+                        className='form-dropdown',
+                        style={'width':'90%'},
+                        persistence='string',
+                        persistence_type='memory'),
+                ],className='three columns margin-Left'),
+
+                html.Div([
+                    html.Label(['Escolha uma métrica:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.Dropdown(id='cboMetricas',
+                        options=[{'label':x, 'value':x} for x in df_combos.sort_values('EMOCOES_COMBO')['EMOCOES_COMBO'].unique()], #df['usuario'].unique()
+                        value=df_combos['EMOCOES_COMBO'][0] if len(df_combos['EMOCOES_COMBO']) > 0 else '',
+                        multi=False,
+                        disabled=False,
+                        clearable=True,
+                        searchable=True,
+                        placeholder='Escolha uma Métrica...',
+                        className='form-dropdown',
+                        style={'width':"90%"},
+                        persistence='string',
+                        persistence_type='memory'),
+                ],className='three columns margin-Left'),
+
+                html.Div([
+                    html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.DatePickerRange(
+                        id="dateRangeMetricas",
+                        min_date_allowed='',
+                        max_date_allowed='',
+                        start_date=dataInicial,
+                        end_date=dataFinal,
+                        display_format='DD/MM/YYYY',
+                    ),
+                ],className='five columns padding-1P'),
+
+            ],className='twelve columns div-fields'),
+
+            html.Div([
+                html.Br(),
                 dcc.Graph(id='grafico_metricas')
             ],className='eight columns'),
 
             html.Div([
-
-                html.Br(),
-                html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'center'}),
-                dcc.Dropdown(id='cboAlunos',
-                    options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
-                    value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '',
-                    multi=True,
-                    disabled=False,
-                    clearable=True,
-                    searchable=True,
-                    placeholder='Escolha um Aluno...',
-                    className='form-dropdown',
-                    style={'width':"90%"},
-                    persistence='string',
-                    persistence_type='memory'),
-
-                dcc.Dropdown(id='cboNrcEmotion',
-                    options=[{'label':x, 'value':x} for x in df_combos.sort_values('EMOCOES_COMBO')['EMOCOES_COMBO'].unique()], #df['usuario'].unique()
-                    value=df_combos['EMOCOES_COMBO'][0] if len(df_combos['EMOCOES_COMBO']) > 0 else '',
-                    multi=False,
-                    disabled=False,
-                    clearable=True,
-                    searchable=True,
-                    placeholder='Escolha uma Métrica...',
-                    className='form-dropdown',
-                    style={'width':"90%"},
-                    persistence='string',
-                    persistence_type='memory'),
-
-                html.Br(),
-
                 html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
                 dcc.Textarea(
                     id='textAreaMsgs',
-                    #value='TextArea contendo a mensagem selecionada',
                     value='',
-                    style={'width': '90%', 'height': 300},
+                    style={'width': '90%', 'height': 470},
                 ),
         
-                #Testeee
+            ],className='three columns margin-Top'),
+
+            html.Div([
                 dcc.ConfirmDialog(
                     id='alertaSemMensagens',
                     message='Não há mensagens para o curso selecionado.',
                 ),
-
-            ],className='three columns'),
+            ])
 
             #Fim segundo gráfico
         
         ])
 
         @app.callback(
-            Output('grafico_polaridade','figure'),
-            [Input('cboAlunoPolaridade','value')]
+            [
+                Output('grafico_polaridade','figure'),
+                Output('textAreaMsgsPolaridade', 'value')
+            ],
+            [
+                Input('grafico_polaridade', 'clickData'),
+                Input('cboAlunoPolaridade','value'),
+                Input('dateRangePolaridade', 'start_date'),
+                Input('dateRangePolaridade', 'end_date')
+            ]
         )
 
-        def atualiza_grafico_polaridade(aluno):
-            dff = df[df['idUsuario'] == aluno]
+        def atualiza_grafico_polaridade(clickData, aluno, start_date, end_date):
+            df_date = pd.DataFrame()
+            df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
+            df_date = df_date.sort_values(by=['data'])
+
+            dff = df[(df['idUsuario'] == aluno) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
             #fig = px.bar(df[mask], x='data', y='polaridade', color='idUsuario')
             
             cores = []
@@ -418,7 +446,29 @@ class GraficosMetricas():
                 }
             }
 
-            return fig
+            #Tratamento pro Click do ponto
+            gValorTexto = ''
+            vet_datas_mensagens_procuradas = []
+
+            if clickData is not None:
+                for indicePoints in range(len(clickData['points'])):
+                    vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
+
+                vet_alunos_mensagens_verificadas = []
+                vet_mensagens_verificadas = []
+
+                for i, data_df in enumerate(dff['data'].values):
+                    for data_mensagem_procurada in vet_datas_mensagens_procuradas:
+                        if data_mensagem_procurada == data_df:
+                            #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
+                            if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
+                                vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
+                                vet_mensagens_verificadas.append(dff['mensagem'].values[i])
+                                sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                #"\033[1m" + s + "\033[0m"
+                                gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
+            
+            return fig, gValorTexto
 
         @app.callback(
             [
@@ -426,12 +476,17 @@ class GraficosMetricas():
                 Output('textAreaMsgs', 'value'),
                 Output('alertaSemMensagens', 'displayed')
             ],
-            [Input('grafico_metricas', 'clickData'),
-            Input('cboAlunos','value'),
-            Input('cboNrcEmotion','value')]
+            [
+                Input('grafico_metricas', 'clickData'),
+                Input('cboAlunos','value'),
+                Input('cboMetricas','value'),
+                Input('dateRangeMetricas', 'start_date'),
+                Input('dateRangeMetricas', 'end_date')
+            ]
+            
         )
 
-        def atualiza_grafico_metricas_nrc(clickData, alunos, nrc_emotion):
+        def atualiza_grafico_metricas(clickData, alunos, nrc_emotion, start_date, end_date):
             dff_aux_alunos = ''
 
             if isinstance(alunos, int): #Caso for apenas um número
@@ -460,7 +515,11 @@ class GraficosMetricas():
             filtraPelaColuna = nrc_emotion
             #colorPelaColuna = 'TEM_' + nrc_emotion.upper()
             if filtraPelaColuna != '':
-                dff=df[ dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion)]
+                df_date = pd.DataFrame()
+                df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
+                df_date = df_date.sort_values(by=['data'])
+                
+                dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
                 dff = dff[dff[filtraPelaColuna].notnull()]
 
                 fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
@@ -476,7 +535,7 @@ class GraficosMetricas():
                 
                 fig.update_layout(yaxis={'title':filtraPelaColuna.upper()},
                                 xaxis={'title':'DATA'},
-                                title={'text':'Métricas De Cada Aluno (Teste)',
+                                title={'text':'Visualização Métricas Gerais',
                                 'font':{'size':20},'x':0.5,'xanchor':'center'},
                                 hovermode='x')
                 
@@ -498,21 +557,12 @@ class GraficosMetricas():
                                 if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
                                     vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
                                     vet_mensagens_verificadas.append(dff['mensagem'].values[i])
-                                    gValorTexto += 'Aluno ' + str(dff['idUsuario'].values[i]) + ': ' + dff['mensagem'].values[i] + '\n\n\n'
+                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                    #"\033[1m" + s + "\033[0m"
+                                    gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
                 return fig, gValorTexto, False
             else:
                 return '', '', True
-
-            #Teste Data em modo DateTime
-            #dff['data'] = pd.to_datetime(dff['data'], format='%d/%m/%Y')
-            #dff = dff.sort_values(by=['data'])
-            #Teste
-
-            
-
-            
-            
-            
 
         webbrowser.open('http://127.0.0.1:8050')
         app.run_server(debug=False)

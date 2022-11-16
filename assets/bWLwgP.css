@@ -38,6 +38,10 @@ color: black !important;
     z-index: 1002;
 }*/
 
+.modebar{
+  display: none !important;
+}
+
 
 /* Grid
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
@@ -373,6 +377,30 @@ ol {
 .u-pull-left {
   float: left; }
 
+.border-bottom {
+  border-bottom: 3px solid black;
+}
+
+.div-fields{
+  /*border: 2px solid grey;*/
+  border-style: inset outset outset inset;
+  /*margin-left: 5%;*/
+  margin-top: 2%;
+  /*padding-left: 20%;*/
+}
+
+.margin-Left{
+  margin-left: 6% !important;
+  padding: 1% !important;
+}
+
+.margin-Top{
+  margin-top: 3% !important;
+}
+
+.padding-1P{
+  padding: 1% !important;
+}
 
 /* Misc
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
