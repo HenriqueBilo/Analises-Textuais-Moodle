@@ -106,7 +106,7 @@ class GraficosMetricas():
 
         #Prepara os dados
 
-        df = pd.read_csv('./data/dados_metricas.csv', sep='-', index_col=False)
+        df = pd.read_csv('./data/dados_metricas_finais.csv', sep='-', index_col=False)
 
         df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
         df = df.sort_values(by=['data'])
@@ -141,19 +141,9 @@ class GraficosMetricas():
                 for chave in dict_nrc_emocoes.keys():
                     dict_nrc_emocoes[chave].append(np.nan)
 
-        #TESTEEE    
-        '''for chave in dict_nrc_emocoes.keys():
-            while len(dict_nrc_emocoes[chave]) < 10:
-                dict_nrc_emocoes[chave].append(np.nan)'''
-            
         #NRC - Tratamento valores de cada emoção (1 coluna pra cada)
         for emocao_nrc in array_nome_nrc_emocoes:
             df[emocao_nrc] = dict_nrc_emocoes[emocao_nrc]   
-
-        #NRC - Adiciona uma coluna contendo todos os nomes das emoções
-        #TESTEEEE
-        #data = {'NOMES_NRC_EMOCOES': array_nome_nrc_emocoes}
-        #df['NOMES_NRC_EMOCOES'] = data['NOMES_NRC_EMOCOES']
 
         #NRC - Cria colunas para saber qual linha tem determinada emoção
         for i, linha in df.iterrows():
@@ -236,6 +226,8 @@ class GraficosMetricas():
                 df.at[i,'TEM_TOXIDADE_GRAVE'] = 'TOXIDADE_GRAVE'
             if linha.ATAQUE_DE_IDENTIDADE != '0':
                 df.at[i,'TEM_ATAQUE_DE_IDENTIDADE'] = 'ATAQUE_DE_IDENTIDADE'
+            if linha.INSULTO != '0':
+                df.at[i,'TEM_INSULTO'] = 'INSULTO'
 
         #Cria dataFrame para o combo de emoções
         df_combos = pd.DataFrame()
@@ -464,8 +456,20 @@ class GraficosMetricas():
                             if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
                                 vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
                                 vet_mensagens_verificadas.append(dff['mensagem'].values[i])
-                                sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
-                                #"\033[1m" + s + "\033[0m"
+                                classificacoes = dff['classificacao'].values[i].split(',')
+                                string_de_classificacao = ''
+                                b_tem_classificacao = False
+                                for i in range(len(classificacoes)):
+                                    classificacao = classificacoes[i][1:].replace("'", "").upper()
+                                    if(classificacao != ']'):
+                                        b_tem_classificacao = True
+                                        string_de_classificacao += '[' + classificacao.replace(']', '') + ']'
+
+                                if b_tem_classificacao:
+                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ' ' + string_de_classificacao + ': '
+                                else:
+                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+
                                 gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
             
             return fig, gValorTexto
@@ -557,9 +561,25 @@ class GraficosMetricas():
                                 if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
                                     vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
                                     vet_mensagens_verificadas.append(dff['mensagem'].values[i])
-                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                    
+                                    #Aqui pegar por ex dff['etiqueta'].values[i] para pegar a etiqueta correspondente
                                     #"\033[1m" + s + "\033[0m"
+                                    classificacoes = dff['classificacao'].values[i].split(',')
+                                    string_de_classificacao = ''
+                                    b_tem_classificacao = False
+                                    for i in range(len(classificacoes)):
+                                        classificacao = classificacoes[i][1:].replace("'", "").upper()
+                                        if(classificacao != ']'):
+                                            b_tem_classificacao = True
+                                            string_de_classificacao += '[' + classificacao.replace(']','') + ']'
+
+                                    if b_tem_classificacao:
+                                        sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ' ' + string_de_classificacao + ': '
+                                    else:
+                                        sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+
                                     gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
+                                    
                 return fig, gValorTexto, False
             else:
                 return '', '', True

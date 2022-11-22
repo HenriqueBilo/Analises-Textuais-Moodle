@@ -6,6 +6,7 @@ import yake  # Para pegar palavras mais utilizadas
 from nrclex import NRCLex  # NrcLex para análise de emoções
 import pandas as pd
 import numpy as np
+from collections import defaultdict
 
 from FuncoesAuxiliares import *
 from GooglePerspectiveApi import *
@@ -110,6 +111,56 @@ class AnalisesResultados():
         chamada_google_perspective_api = GooglePerspectiveApi()
         chamada_google_perspective_api.chama_api_google_perspective(retornoMensagens)
 
+    def classifica_mensagens(self, retornoMensagens):
+
+        dic_classificacao = defaultdict(list)
+
+        #Obs a mensagem[i] pode ter mais de 1 classificação
+
+        for i in range(len(retornoMensagens)):
+            polaridade = retornoMensagens[i][3] #Polaridade (valor num)
+            emocoes_nrc = retornoMensagens[i][4].split('*') #Nrc emotions (Emocoes:valor*Emocoes:Valor)
+            google_perspective = retornoMensagens[i][5].split('*') #Google perspective (Emocoes:valor*Emocoes*valor)
+
+            for nrc in range(len(emocoes_nrc)):
+                nome_emocao_nrc = emocoes_nrc[nrc].split(':')[0]
+                valor_emocao_nrc = emocoes_nrc[nrc].split(':')[1]
+
+                for google_p in range(len(google_perspective)):
+                    nome_emocao_google = google_perspective[google_p].split(':')[0]
+                    valor_emocao_google = google_perspective[google_p].split(':')[1]
+
+                    eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.6) \
+                                    | (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.6)
+                    eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.6) \
+                                  | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.6) \
+                                  | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.6) 
+                    eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.5) \
+                                | (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.5)
+                    eh_insatisfacao = (nome_emocao_google == 'Desgosto' and float(valor_emocao_google) > 0.5) \
+                                      | (nome_emocao_google == 'Tristeza' and float(valor_emocao_google) > 0.5)
+
+                    if float(polaridade) < 0 and eh_reclamacao:
+                        if 'Reclamação' not in dic_classificacao[i]:
+                            dic_classificacao[i].append('Reclamação')
+                    if float(polaridade) < 0 and eh_agressao:
+                        if 'Agressão' not in dic_classificacao[i]:
+                            dic_classificacao[i].append('Agressão')
+                    if float(polaridade) > 0.8 and eh_elogio:
+                        if 'Elogio' not in dic_classificacao[i]:
+                            dic_classificacao[i].append('Elogio')
+                    if float(polaridade) < 0 and eh_insatisfacao:
+                        if 'Insatisfação' not in dic_classificacao[i]:
+                            dic_classificacao[i].append('Insatisfação')
+                    '''if not(eh_reclamacao) and not(eh_agressao) and not(eh_elogio) and not(eh_insatisfacao):
+                        dic_classificacao[i].append('None') #Erro aqui...'''
+                    
+
+                
+        #Grava no csv
+        funcoes_auxiliares = FuncoesAuxiliares()
+        funcoes_auxiliares.adiciona_nova_coluna('./data/dados_metricas.csv', './data/dados_metricas_finais.csv', 'classificacao', dic_classificacao)
+                    
     def analise_metricas(self, retornoMensagens):
         #Analise de Polaridade
         self.analisa_polaridade(retornoMensagens)
@@ -127,3 +178,9 @@ class AnalisesResultados():
 
         # Analisa Google Perspective API
         self.chamada_google_perspectiveApi(retorno_mensagens.loc[:].values)
+
+        # Classifica as mensagens
+
+        retorno_mensagens = pd.read_csv('./data/dados_metricas.csv', sep='-')
+
+        self.classifica_mensagens(retorno_mensagens.loc[:].values)

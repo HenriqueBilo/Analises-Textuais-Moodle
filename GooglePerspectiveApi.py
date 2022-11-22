@@ -5,7 +5,7 @@ from FuncoesAuxiliares import *
 
 class GooglePerspectiveApi():
     def chama_api_google_perspective(self, retornoMensagens):
-        api_key = ''
+        api_key = 'AIzaSyDPQd2sZX_8qvhon2LJ4SkVlOT5C-GKlHI'
         url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=' + api_key)
 
         array_metricas = []
@@ -17,7 +17,7 @@ class GooglePerspectiveApi():
                 data_dict = {
                 'comment': {'text': frase},
                 'languages': ['pt'],
-                'requestedAttributes': {'TOXICITY': {}, 'IDENTITY_ATTACK': {}, 'PROFANITY': {}, 'SEVERE_TOXICITY': {}, 'THREAT': {}} #, 'INSULT': {}
+                'requestedAttributes': {'TOXICITY': {}, 'IDENTITY_ATTACK': {}, 'PROFANITY': {}, 'SEVERE_TOXICITY': {}, 'THREAT': {}, 'INSULT': {}}
                 }
 
                 try:
@@ -29,12 +29,14 @@ class GooglePerspectiveApi():
                     valor_ataque_identidade = response_dict['attributeScores']['IDENTITY_ATTACK']['summaryScore']['value']
                     valor_ameaca = response_dict['attributeScores']['THREAT']['summaryScore']['value']
                     valor_toxidade = response_dict['attributeScores']['TOXICITY']['summaryScore']['value']
+                    valor_insulto = response_dict['attributeScores']['INSULT']['summaryScore']['value']
 
                     valores_concatenados = 'Profanidade:' + str(valor_profanidade) + '*' + \
                                         'Toxidade Grave:' + str(valor_toxidade_grave) + '*' + \
                                         'Ataque de Identidade:' + str(valor_ataque_identidade) + '*' + \
                                         'Ameaça:' + str(valor_ameaca) + '*' + \
-                                        'Toxidade:' + str(valor_toxidade)
+                                        'Toxidade:' + str(valor_toxidade) + '*' + \
+                                        'Insulto:' + str(valor_insulto) 
 
                     array_metricas.append(valores_concatenados)
 
@@ -44,7 +46,8 @@ class GooglePerspectiveApi():
                                             'Toxidade Grave:' + str(0) + '*' + \
                                             'Ataque de Identidade:' + str(0) + '*' + \
                                             'Ameaça:' + str(0) + '*' + \
-                                            'Toxidade:' + str(0)
+                                            'Toxidade:' + str(0) + '*' + \
+                                            'Insulto:' + str(0) 
                     array_metricas.append(valores_concatenados)
                     pass
             else:
@@ -52,7 +55,8 @@ class GooglePerspectiveApi():
                                         'Toxidade Grave:' + str(0) + '*' + \
                                         'Ataque de Identidade:' + str(0) + '*' + \
                                         'Ameaça:' + str(0) + '*' + \
-                                        'Toxidade:' + str(0)
+                                        'Toxidade:' + str(0) + '*' + \
+                                        'Insulto:' + str(0) 
                 array_metricas.append(valores_concatenados)
 
         funcoes_auxiliares = FuncoesAuxiliares()
