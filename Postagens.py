@@ -17,7 +17,7 @@ class Postagens():
 
             soup = BeautifulSoup(post['message'], 'html.parser')
             self.posts[post['id']] = post['subject'] + '*' + \
-                soup.get_text().replace('\xa0', '').replace('\n', '').replace('-', '').replace('*', '') + '*' + str(post['author']['id']) + '*' + dataFormatada
+                soup.get_text().replace('\xa0', '').replace('\n', ' ').replace('-', '').replace('*', '') + '*' + str(post['author']['id']) + '*' + dataFormatada
 
     def grava_csv_posts(self):
         with open('./data/dados_posts.csv', 'w', newline='', encoding='utf-8') as csvfile:

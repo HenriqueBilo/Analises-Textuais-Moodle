@@ -8,6 +8,7 @@ import plotly.express as px
 from FuncoesAuxiliares import *
 import webbrowser
 from datetime import date
+from collections import defaultdict
 
 class GraficosMetricas():
     def formata_data(self, data):
@@ -252,7 +253,14 @@ class GraficosMetricas():
             dataInicial = ''
             dataFinal = ''
 
-        app = dash.Dash(__name__)
+        app = dash.Dash(
+            __name__,external_stylesheets=['https://use.fontawesome.com/releases/v5.7.2/css/all.css'],
+
+            meta_tags=[
+                {'charset': 'utf-8'},
+                {'name':'viewport','content':'width=device-width, initial-scale=1.0, shrink-to-fit=no'}
+            ],
+        )
 
         app.layout = html.Div([
 
@@ -303,6 +311,7 @@ class GraficosMetricas():
                     id='textAreaMsgsPolaridade',
                     value='',
                     style={'width': '90%', 'height': 200},
+                    readOnly=True,
                 ),
                 
             ],className='three columns'),
@@ -316,8 +325,17 @@ class GraficosMetricas():
             #Segundo Gráfico
 
             html.Div([
+
                 html.Div([
-                    html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    html.I(className='far fa-address-card', style={'font-size':'36px', 'margin-left': '170%', 'margin-top': '46%'}),
+                ],className='one column'),
+
+                html.Div([
+                    
+                    html.Label(
+                        ['Escolha um Aluno:'],
+                        style={'font-weight': 'bold', 'text-align': 'left'},
+                    ),
                     dcc.Dropdown(id='cboAlunos',
                         options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
                         value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '',
@@ -330,7 +348,11 @@ class GraficosMetricas():
                         style={'width':'90%'},
                         persistence='string',
                         persistence_type='memory'),
-                ],className='three columns margin-Left'),
+                ],className='two columns margin-Left'),
+
+                html.Div([
+                    html.I(className='far fa-smile', style={'font-size':'36px', 'margin-left': '170%', 'margin-top': '46%'}),
+                ],className='one column'),
 
                 html.Div([
                     html.Label(['Escolha uma métrica:'],style={'font-weight': 'bold', 'text-align': 'left'}),
@@ -346,7 +368,11 @@ class GraficosMetricas():
                         style={'width':"90%"},
                         persistence='string',
                         persistence_type='memory'),
-                ],className='three columns margin-Left'),
+                ],className='two columns margin-Left'),
+
+                html.Div([
+                    html.I(className='far fa-calendar-check', style={'font-size':'36px', 'margin-left': '140%', 'margin-top': '46%'}),
+                ],className='one column'),
 
                 html.Div([
                     html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
@@ -358,7 +384,7 @@ class GraficosMetricas():
                         end_date=dataFinal,
                         display_format='DD/MM/YYYY',
                     ),
-                ],className='five columns padding-1P'),
+                ],className='four columns padding-1P'),
 
             ],className='twelve columns div-fields'),
 
@@ -369,12 +395,10 @@ class GraficosMetricas():
 
             html.Div([
                 html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
-                dcc.Textarea(
-                    id='textAreaMsgs',
-                    value='',
-                    style={'width': '90%', 'height': 470},
+                html.Div(
+                    id='divMetricasFakeTextArea', 
+                    style={'width': '95%', 'height': '470px', 'min-width': '120px', 'min-height': '90px', 'max-width': '400px', 'max-height': '470px', 'padding': '1px', 'border': '1px solid rgb(169, 169, 169)', 'overflow-y': 'auto', 'resize': 'both', 'background-color': 'rgb(235, 235, 228)' }
                 ),
-        
             ],className='three columns margin-Top'),
 
             html.Div([
@@ -440,6 +464,7 @@ class GraficosMetricas():
 
             #Tratamento pro Click do ponto
             gValorTexto = ''
+            gCabecalhoTexto = ''
             vet_datas_mensagens_procuradas = []
 
             if clickData is not None:
@@ -477,20 +502,20 @@ class GraficosMetricas():
         @app.callback(
             [
                 Output('grafico_metricas','figure'),
-                Output('textAreaMsgs', 'value'),
-                Output('alertaSemMensagens', 'displayed')
+                Output('alertaSemMensagens', 'displayed'),
+                Output('divMetricasFakeTextArea', 'children'),
             ],
             [
                 Input('grafico_metricas', 'clickData'),
                 Input('cboAlunos','value'),
                 Input('cboMetricas','value'),
                 Input('dateRangeMetricas', 'start_date'),
-                Input('dateRangeMetricas', 'end_date')
+                Input('dateRangeMetricas', 'end_date'),
+                State('divMetricasFakeTextArea', 'children')
             ]
-            
         )
 
-        def atualiza_grafico_metricas(clickData, alunos, nrc_emotion, start_date, end_date):
+        def atualiza_grafico_metricas(clickData, alunos, nrc_emotion, start_date, end_date, children):
             dff_aux_alunos = ''
 
             if isinstance(alunos, int): #Caso for apenas um número
@@ -545,6 +570,8 @@ class GraficosMetricas():
                 
                 #Tratamento pro Click do ponto
                 gValorTexto = ''
+                gCabecalhoTexto = ''
+                gStringClassificacao = ''
                 vet_datas_mensagens_procuradas = []
 
                 if clickData is not None:
@@ -565,24 +592,73 @@ class GraficosMetricas():
                                     #Aqui pegar por ex dff['etiqueta'].values[i] para pegar a etiqueta correspondente
                                     #"\033[1m" + s + "\033[0m"
                                     classificacoes = dff['classificacao'].values[i].split(',')
-                                    string_de_classificacao = ''
+                                    gStringClassificacao = ''
                                     b_tem_classificacao = False
-                                    for i in range(len(classificacoes)):
-                                        classificacao = classificacoes[i][1:].replace("'", "").upper()
+                                    for j in range(len(classificacoes)):
+                                        classificacao = classificacoes[j][1:].replace("'", "").upper()
                                         if(classificacao != ']'):
                                             b_tem_classificacao = True
-                                            string_de_classificacao += '[' + classificacao.replace(']','') + ']'
+                                            gStringClassificacao += '[' + classificacao.replace(']','') + ']'
 
                                     if b_tem_classificacao:
-                                        sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ' ' + string_de_classificacao + ': '
+                                        gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': ' #' ' + gStringClassificacao +
                                     else:
-                                        sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                        gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
 
-                                    gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
-                                    
-                return fig, gValorTexto, False
+                                    gValorTexto += dff['mensagem'].values[i] + '\n\n\n'
+                                    #
+          
+                corClassificacao = ''
+                indices_adicionados_children = []
+                dict_divs = defaultdict(list)
+
+                if gStringClassificacao != '':
+                    vetClassificacao = gStringClassificacao.split(']')
+                    for i in range(len(vetClassificacao)):
+                        if vetClassificacao[i] != '':
+                            vetClassificacao[i] += ']'
+                            if vetClassificacao[i] == '[AGRESSÃO]':
+                                corClassificacao = 'red'
+                            elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
+                                corClassificacao = 'orange'
+                            elif vetClassificacao[i] == '[ELOGIO]':
+                                corClassificacao = 'green'
+                            else:
+                                corClassificacao = 'black'
+
+                            nova_div = html.Div(
+                                children=[
+                                    html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
+                                ]
+                            )
+
+                            indices_adicionados_children.append(len(children))
+                            children.append(nova_div)
+
+                teste2 = {}
+                if len(indices_adicionados_children) > 0:
+                    for i in range(len(indices_adicionados_children)):
+                        if i == 0:
+                            teste = children[indices_adicionados_children[i]]
+                        else:
+                            teste.children.append(children[indices_adicionados_children[i]])
+                    teste2 = teste
+
+                #children = dict_divs[0].children
+                
+                new_div = html.Div(
+                    children=[
+                        html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                        html.Div(teste2),
+                        html.Div(gValorTexto, style={'float': 'right'}),
+                    ]
+                )
+
+                return fig, False, new_div.children
+                #html.Div(gValorTexto, style={'width': '95%', 'height': 470,'color': 'red'}).children
+                #html.Div(gValorTexto, style={'width': '95%', 'height': 470,'color': 'red'}).style
             else:
-                return '', '', True
+                return '', '', True, ''
 
         webbrowser.open('http://127.0.0.1:8050')
         app.run_server(debug=False)

@@ -130,15 +130,18 @@ class AnalisesResultados():
                     nome_emocao_google = google_perspective[google_p].split(':')[0]
                     valor_emocao_google = google_perspective[google_p].split(':')[1]
 
-                    eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.6) \
-                                    | (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.6)
-                    eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.6) \
-                                  | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.6) \
-                                  | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.6) 
-                    eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.5) \
-                                | (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.5)
-                    eh_insatisfacao = (nome_emocao_google == 'Desgosto' and float(valor_emocao_google) > 0.5) \
-                                      | (nome_emocao_google == 'Tristeza' and float(valor_emocao_google) > 0.5)
+                    eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.8) \
+                                    | (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.8)
+
+                    eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.8) \
+                                  | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.8) \
+                                  | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.8) 
+
+                    eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.8) \
+                                | (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.8)
+
+                    eh_insatisfacao = (nome_emocao_google == 'Desgosto' and float(valor_emocao_google) > 0.8) \
+                                      | (nome_emocao_google == 'Tristeza' and float(valor_emocao_google) > 0.8)
 
                     if float(polaridade) < 0 and eh_reclamacao:
                         if 'Reclamação' not in dic_classificacao[i]:
@@ -146,7 +149,7 @@ class AnalisesResultados():
                     if float(polaridade) < 0 and eh_agressao:
                         if 'Agressão' not in dic_classificacao[i]:
                             dic_classificacao[i].append('Agressão')
-                    if float(polaridade) > 0.8 and eh_elogio:
+                    if float(polaridade) > 0 and eh_elogio:
                         if 'Elogio' not in dic_classificacao[i]:
                             dic_classificacao[i].append('Elogio')
                     if float(polaridade) < 0 and eh_insatisfacao:

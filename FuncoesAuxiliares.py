@@ -63,8 +63,11 @@ class FuncoesAuxiliares():
                         if msg['useridfrom'] in user and msg['useridto'] in user:
                             dataMensagemChatObject = datetime.fromtimestamp(msg['timecreated'])
                             dataFormatada = str(dataMensagemChatObject.day).zfill(2) + '/' + str(dataMensagemChatObject.month).zfill(2) + '/' + str(dataMensagemChatObject.year)
+                            
+                            msg['fullmessage'] = msg['fullmessage'].replace('\xa0', '').replace('\n', ' ').replace('-', '').replace('*', '')
+                            
                             directMessagesArray[msg['id']] = str(msg['useridfrom']) + '*' + str(msg['useridto']) + '*' \
-                                + msg['fullmessage'].replace('\xa0', '').replace('\n', '').replace('-', '').replace('*', '') + '*' + dataFormatada
+                                + msg['fullmessage'].split('Este email é a cópia de uma mensagem que foi enviada para você em')[0] + '*' + dataFormatada
 
         with open('./data/dados_mensagens_diretas.csv', 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile, delimiter='-')
