@@ -6,11 +6,12 @@ from datetime import datetime
 class Postagens():
     '''Retorna a lista de posts de uma determinada discussão'''
 
-    def __init__(self):
+    def __init__(self, moodle_api):
+        self.moodle_api = moodle_api
         self.posts = {}
 
     def coleta_postagens(self, discussionId):
-        posts_data = call('mod_forum_get_discussion_posts', discussionid=discussionId)
+        posts_data = self.moodle_api.call('mod_forum_get_discussion_posts', discussionid=discussionId)
         for post in posts_data['posts']:
             dataMensagemChatObject = datetime.fromtimestamp(post['timecreated'])
             dataFormatada = str(dataMensagemChatObject.day).zfill(2) + '/' + str(dataMensagemChatObject.month).zfill(2) + '/' + str(dataMensagemChatObject.year)

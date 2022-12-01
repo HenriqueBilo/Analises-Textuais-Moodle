@@ -4,22 +4,23 @@ from datetime import datetime
 
 class Chats():
 
-    def __init__(self, courseArrays):
+    def __init__(self, courseArrays, moodle_api):
 
         self.chat_messages = {}
+        self.moodle_api = moodle_api
 
-        chats_data = call('mod_chat_get_chats_by_courses', courseids=courseArrays)
+        chats_data = self.moodle_api.call('mod_chat_get_chats_by_courses', courseids=courseArrays)
         self.grava_csv_dados_chats(chats_data)
         self.chats = {}
         for chat in chats_data['chats']:
             self.chats[chat['id']] = chat['name']
 
     def get_messages_from_chat_id(self, chatId):
-        dados_sessoes = call('mod_chat_get_sessions', chatid=chatId, showall=1)
+        dados_sessoes = self.moodle_api.call('mod_chat_get_sessions', chatid=chatId, showall=1)
 
         for sessao in dados_sessoes['sessions']:
             if len(sessao['sessionusers']) > 0:
-                mensagens_sessoes = call('mod_chat_get_session_messages', chatid=chatId, sessionstart=sessao['sessionstart'], sessionend=sessao['sessionend'])
+                mensagens_sessoes = self.moodle_api.call('mod_chat_get_session_messages', chatid=chatId, sessionstart=sessao['sessionstart'], sessionend=sessao['sessionend'])
                 for mensagem in mensagens_sessoes['messages']:
                     # Da pra pegar o 'userid' tbm
 

@@ -1,46 +1,66 @@
-from requests import post
+#from requests import post
+import requests
 
 # Module variables to connect to moodle api
-KEY = "473ac626e7ee6bdc85952bc8b93e0294" #52dd910d055efadfbadbadc6a1b1b18d
+KEY = ''
 URL = "https://moodle.ufrgs.br"  # "http://localhost" #
 ENDPOINT = "/webservice/rest/server.php"
 
-def rest_api_parameters(in_args, prefix='', out_dict=None):
-    """Transform dictionary/array structure to a flat dictionary, with key names
-    defining the structure.
-    Example usage:
-    >>> rest_api_parameters({'courses':[{'id':1,'name': 'course1'}]})
-    {'courses[0][id]':1,
-     'courses[0][name]':'course1'}
-    """
-    if out_dict == None:
-        out_dict = {}
-    if not type(in_args) in (list, dict):
-        out_dict[prefix] = in_args
-        return out_dict
-    if prefix == '':
-        prefix = prefix + '{0}'
-    else:
-        prefix = prefix + '[{0}]'
-    if type(in_args) == list:
-        for idx, item in enumerate(in_args):
-            rest_api_parameters(item, prefix.format(idx), out_dict)
-    elif type(in_args) == dict:
-        for key, item in in_args.items():
-            rest_api_parameters(item, prefix.format(key), out_dict)
-    return out_dict
+class MoodleApi():
+    def __init__(self):
 
-def call(fname, **kwargs):
-    """Calls moodle API function with function name fname and keyword arguments.
-    Example:
-    >>> call_mdl_function('core_course_update_courses',
-                           courses = [{'id': 1, 'fullname': 'My favorite course'}])
-    """
-    parameters = rest_api_parameters(kwargs)
-    parameters.update(
-        {"wstoken": KEY, 'moodlewsrestformat': 'json', "wsfunction": fname})
-    response = post(URL+ENDPOINT, parameters)
-    response = response.json()
-    if type(response) == dict and response.get('exception'):
-        raise SystemError("Error calling Moodle API\n", response)
-    return response
+        self.KEY = ''
+        self.URL = "https://moodle.ufrgs.br"
+        self.ENDPOINT = "/webservice/rest/server.php"
+    
+    def rest_api_parameters(self, in_args, prefix='', out_dict=None):
+        """Transform dictionary/array structure to a flat dictionary, with key names
+        defining the structure.
+        Example usage:
+        >>> rest_api_parameters({'courses':[{'id':1,'name': 'course1'}]})
+        {'courses[0][id]':1,
+        'courses[0][name]':'course1'}
+        """
+        if out_dict == None:
+            out_dict = {}
+        if not type(in_args) in (list, dict):
+            out_dict[prefix] = in_args
+            return out_dict
+        if prefix == '':
+            prefix = prefix + '{0}'
+        else:
+            prefix = prefix + '[{0}]'
+        if type(in_args) == list:
+            for idx, item in enumerate(in_args):
+                self.rest_api_parameters(item, prefix.format(idx), out_dict)
+        elif type(in_args) == dict:
+            for key, item in in_args.items():
+                self.rest_api_parameters(item, prefix.format(key), out_dict)
+        return out_dict
+
+    def call(self, fname, **kwargs):
+        """Calls moodle API function with function name fname and keyword arguments.
+        Example:
+        >>> call_mdl_function('core_course_update_courses',
+                            courses = [{'id': 1, 'fullname': 'My favorite course'}])
+        """
+        parameters = self.rest_api_parameters(kwargs)
+        parameters.update(
+            {"wstoken": self.KEY, 'moodlewsrestformat': 'json', "wsfunction": fname})
+        response = requests.post(self.URL + self.ENDPOINT, parameters)
+        response = response.json()
+        if type(response) == dict and response.get('exception'):
+            raise SystemError("Error calling Moodle API\n", response)
+        return response
+
+    def criar_token(self, usuario, senha):
+        request_token = requests.get('https://www.moodle.ufrgs.br/login/token.php?username='+ usuario + '&password='+ senha + '&service=moodle_mobile_app')
+
+        if 'error' not in request_token.json():
+            self.KEY = request_token.json()['token']
+            return True
+        
+        return False
+
+
+    

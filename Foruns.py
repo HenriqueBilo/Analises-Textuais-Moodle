@@ -4,8 +4,10 @@ import csv
 class Foruns():
     '''Retorna uma lista de foruns'''
 
-    def __init__(self, arrayForums):
-        forums_data = call('mod_forum_get_forums_by_courses', courseids=arrayForums)
+    def __init__(self, arrayForums, moodle_api):
+        self.moodle_api = moodle_api
+
+        forums_data = self.moodle_api.call('mod_forum_get_forums_by_courses', courseids=arrayForums)
         self.forums = {}
         for forum in forums_data:
             self.forums[forum['id']] = str(forum['course']) + '*' + forum['name'] #+ '*' + forum['intro']

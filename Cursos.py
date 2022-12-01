@@ -4,11 +4,12 @@ import csv
 class Cursos():
     '''Classe que pega todos os cursos que um determinado usuário participa'''
 
-    def __init__(self):
+    def __init__(self, moodle_api):
         self.courses = {}
+        self.moodle_api = moodle_api
 
     def busca_curso_por_usuario(self, idUsuario):
-        dados_cursos = call('core_enrol_get_users_courses', userid=idUsuario)
+        dados_cursos = self.moodle_api.call('core_enrol_get_users_courses', userid=idUsuario)
         self.grava_csv_dados_cursos(dados_cursos)
         for dados in dados_cursos:
             # VERIFICAR depois se isso funciona 100%

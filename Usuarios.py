@@ -2,9 +2,11 @@ from MoodleApi import *
 import csv
 
 class Usuarios():
-    def __init__(self, course, idUsuarioBuscado):
+    def __init__(self, course, idUsuarioBuscado, moodle_api):
+        self.moodle_api = moodle_api
+
         "Pega os usuários de um curso específico"
-        users_data = call('core_enrol_get_enrolled_users', courseid=course)
+        users_data = self.moodle_api.call('core_enrol_get_enrolled_users', courseid=course)
         self.idUsuarioBuscado = idUsuarioBuscado
         self.users = {}
         for data in users_data:

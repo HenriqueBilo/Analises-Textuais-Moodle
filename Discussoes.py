@@ -5,8 +5,10 @@ from bs4 import BeautifulSoup
 class Discussoes():
     '''Retorna uma lista de discussões de um determinado fórum'''
 
-    def __init__(self, forumId):
-        discussions_data = call('mod_forum_get_forum_discussions', forumid=forumId)
+    def __init__(self, forumId, moodle_api):
+        self.moodle_api = moodle_api
+
+        discussions_data = self.moodle_api.call('mod_forum_get_forum_discussions', forumid=forumId)
         self.discussions = {}
         for discussion in discussions_data['discussions']:
             soup = BeautifulSoup(discussion['message'], 'html.parser')

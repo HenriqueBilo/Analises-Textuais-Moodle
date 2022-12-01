@@ -5,19 +5,33 @@ from Usuarios import *
 from Foruns import *
 from Discussoes import *
 from Postagens import *
+from MoodleApi import *
 
 import os
 
 class FuncoesAuxiliares():
-    def pega_informacoes_usuario(self):
-        usuario = input('Informe seu usuário (matrícula): ')
 
-        #emailArray = []
-        #emailArray.append(usuario)
-        realizaLogin = Autenticacao(usuario.zfill(8))
+    def __init__(self):
+        self.moodle_api = MoodleApi()
+
+    def pega_informacoes_usuario(self):
+
+        while(True):
+            usuario = input('Informe seu usuário (matrícula UFRGS): ')
+            senha = input('Informe sua senha: ')
+
+            usuario = usuario.zfill(8)
+
+            retorno_token = self.moodle_api.criar_token(usuario, senha)
+            if retorno_token:
+                break
+            
+            print('Usuário ou senha inválidos. Tente novamente')
+        
+        realizaLogin = Autenticacao(usuario, self.moodle_api)
         idUsuarioBuscado = realizaLogin.login()
 
-        listaCursosUsuario = Cursos()
+        listaCursosUsuario = Cursos(self.moodle_api)
         listaCursosUsuario.busca_curso_por_usuario(idUsuarioBuscado)
         return listaCursosUsuario, idUsuarioBuscado
 
@@ -40,7 +54,7 @@ class FuncoesAuxiliares():
         cursosArray = []
         cursosArray.append(idDisciplinaEscolhida)
 
-        retorno = Chats(cursosArray)
+        retorno = Chats(cursosArray, self.moodle_api)
         for chat in retorno.chats:
             retorno.get_messages_from_chat_id(chat)
         os.remove('./data/dados_chats.csv')
@@ -50,14 +64,14 @@ class FuncoesAuxiliares():
     def coleta_mensagens_diretas_ao_professor(self, cursosArray, idUsuarioBuscado):
         usersArray = []
         for curso in cursosArray:
-            retorno = Usuarios(curso, idUsuarioBuscado)
+            retorno = Usuarios(curso, idUsuarioBuscado, self.moodle_api)
             usersArray.append(retorno.users)
 
         directMessagesArray = {}
         for user in usersArray:
             for userId in user:
                 if userId == idUsuarioBuscado:
-                    retorno = call('core_message_get_messages', useridto=userId, useridfrom=0, type='conversations', read=1)
+                    retorno = self.moodle_api.call('core_message_get_messages', useridto=userId, useridfrom=0, type='conversations', read=1)
 
                     for msg in retorno['messages']:
                         if msg['useridfrom'] in user and msg['useridto'] in user:
@@ -79,14 +93,14 @@ class FuncoesAuxiliares():
                 writer.writerow([idMensagemDireta, dadosMensagem[0], dadosMensagem[1], dadosMensagem[2], dadosMensagem[3]])
 
     def coleta_mensagens_dos_foruns(self, cursosArray):
-        listaDeForums = Foruns(cursosArray)
+        listaDeForums = Foruns(cursosArray, self.moodle_api)
 
         discussionsArray = []
         for forum in listaDeForums.forums:
-            retorno = Discussoes(forum)
+            retorno = Discussoes(forum, self.moodle_api)
             discussionsArray.append(retorno.discussions)
 
-        postagens = Postagens()
+        postagens = Postagens(self.moodle_api)
         for discussion in discussionsArray:
             for discussionId in discussion:
                 postagens.coleta_postagens(discussionId)
