@@ -267,6 +267,50 @@ class GraficosMetricas():
             #Primeiro gráfico
 
             html.Div([
+
+                html.Div([
+                    html.I(className='far fa-address-card', style={'font-size':'36px', 'margin-left': '170%', 'margin-top': '46%'}),
+                ],className='one column'),
+
+                html.Div([
+                    
+                    html.Label(
+                        ['Escolha um Aluno:'],
+                        style={'font-weight': 'bold', 'text-align': 'left'},
+                    ),
+                    dcc.Dropdown(id='cboAlunoPolaridade',
+                        options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
+                        value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '', #Deve ta vindo vazio dai n funciona print ("par" if x % 2 == 0 else "impar")
+                        multi=False,
+                        disabled=False,
+                        clearable=True,
+                        searchable=True,
+                        placeholder='Escolha um Aluno...',
+                        className='form-dropdown',
+                        style={'width':"90%"},
+                        persistence='string',
+                        persistence_type='memory'),
+                ],className='two columns margin-Left'),
+
+                html.Div([
+                    html.I(className='far fa-calendar-check', style={'font-size':'36px', 'margin-left': '140%', 'margin-top': '46%'}),
+                ],className='one column'),
+
+                html.Div([
+                    html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.DatePickerRange(
+                        id="dateRangePolaridade",
+                        min_date_allowed='',
+                        max_date_allowed='',
+                        start_date=dataInicial,
+                        end_date=dataFinal,
+                        display_format='DD/MM/YYYY'
+                    ),
+                ],className='four columns padding-1P'),
+
+            ],className='twelve columns div-fields'),
+
+            html.Div([
                 dcc.Graph(
                 figure={
                     'data': [
@@ -281,40 +325,12 @@ class GraficosMetricas():
             ],className='eight columns'),
 
             html.Div([
-                html.Br(),
-                html.Label(['Escolha um Aluno (Identificador):'],style={'font-weight': 'bold', 'text-align': 'left'}),
-                dcc.Dropdown(id='cboAlunoPolaridade',
-                    options=[{'label':x, 'value':x} for x in df.sort_values('idUsuario')['idUsuario'].unique()], #df['usuario'].unique()
-                    value=df['idUsuario'][0] if len(df['idUsuario']) > 0 else '', #Deve ta vindo vazio dai n funciona print ("par" if x % 2 == 0 else "impar")
-                    multi=False,
-                    disabled=False,
-                    clearable=True,
-                    searchable=True,
-                    placeholder='Escolha um Aluno...',
-                    className='form-dropdown',
-                    style={'width':"90%"},
-                    persistence='string',
-                    persistence_type='memory'),
-
-                html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
-                dcc.DatePickerRange(
-                    id="dateRangePolaridade",
-                    min_date_allowed='',
-                    max_date_allowed='',
-                    start_date=dataInicial,
-                    end_date=dataFinal,
-                    display_format='DD/MM/YYYY'
-                ),
-
                 html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
-                dcc.Textarea(
+                html.Div(
                     id='textAreaMsgsPolaridade',
-                    value='',
-                    style={'width': '90%', 'height': 200},
-                    readOnly=True,
+                    style={'width': '95%', 'height': '450px', 'min-width': '120px', 'min-height': '90px', 'max-width': '400px', 'max-height': '470px', 'padding': '1px', 'border': '1px solid rgb(169, 169, 169)', 'overflow-y': 'auto', 'resize': 'both', 'background-color': 'rgb(235, 235, 228)' },
                 ),
-                
-            ],className='three columns'),
+            ],className='three columns margin-Top'),
 
             html.Div([
                 html.Br()
@@ -415,17 +431,18 @@ class GraficosMetricas():
         @app.callback(
             [
                 Output('grafico_polaridade','figure'),
-                Output('textAreaMsgsPolaridade', 'value')
+                Output('textAreaMsgsPolaridade', 'children'),
             ],
             [
                 Input('grafico_polaridade', 'clickData'),
                 Input('cboAlunoPolaridade','value'),
                 Input('dateRangePolaridade', 'start_date'),
-                Input('dateRangePolaridade', 'end_date')
+                Input('dateRangePolaridade', 'end_date'),
+                State('textAreaMsgsPolaridade', 'children')
             ]
         )
 
-        def atualiza_grafico_polaridade(clickData, aluno, start_date, end_date):
+        def atualiza_grafico_polaridade(clickData, aluno, start_date, end_date, children):
             df_date = pd.DataFrame()
             df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
             df_date = df_date.sort_values(by=['data'])
@@ -465,6 +482,7 @@ class GraficosMetricas():
             #Tratamento pro Click do ponto
             gValorTexto = ''
             gCabecalhoTexto = ''
+            gStringClassificacao = ''
             vet_datas_mensagens_procuradas = []
 
             if clickData is not None:
@@ -482,22 +500,68 @@ class GraficosMetricas():
                                 vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
                                 vet_mensagens_verificadas.append(dff['mensagem'].values[i])
                                 classificacoes = dff['classificacao'].values[i].split(',')
-                                string_de_classificacao = ''
+                                gStringClassificacao = ''
                                 b_tem_classificacao = False
                                 for i in range(len(classificacoes)):
                                     classificacao = classificacoes[i][1:].replace("'", "").upper()
                                     if(classificacao != ']'):
                                         b_tem_classificacao = True
-                                        string_de_classificacao += '[' + classificacao.replace(']', '') + ']'
+                                        gStringClassificacao += '[' + classificacao.replace(']', '') + ']'
 
                                 if b_tem_classificacao:
-                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ' ' + string_de_classificacao + ': '
+                                    gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': ' # + string_de_classificacao + ': '
                                 else:
-                                    sAluno = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                    gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
 
-                                gValorTexto += sAluno + dff['mensagem'].values[i] + '\n\n\n'
+                                gValorTexto += dff['mensagem'].values[i] + '\n\n\n'
             
-            return fig, gValorTexto
+            corClassificacao = ''
+            indices_adicionados_children = []
+            dict_divs = defaultdict(list)
+
+            if gStringClassificacao != '':
+                vetClassificacao = gStringClassificacao.split(']')
+                for i in range(len(vetClassificacao)):
+                    if vetClassificacao[i] != '':
+                        vetClassificacao[i] += ']'
+                        if vetClassificacao[i] == '[AGRESSÃO]':
+                            corClassificacao = 'red'
+                        elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
+                            corClassificacao = 'orange'
+                        elif vetClassificacao[i] == '[ELOGIO]':
+                            corClassificacao = 'green'
+                        else:
+                            corClassificacao = 'black'
+
+                        nova_div = html.Div(
+                            children=[
+                                html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
+                            ]
+                        )
+
+                        indices_adicionados_children.append(len(children))
+                        children.append(nova_div)
+
+            teste2 = {}
+            if len(indices_adicionados_children) > 0:
+                for i in range(len(indices_adicionados_children)):
+                    if i == 0:
+                        teste = children[indices_adicionados_children[i]]
+                    else:
+                        teste.children.append(children[indices_adicionados_children[i]])
+                teste2 = teste
+
+            #children = dict_divs[0].children
+            
+            new_div = html.Div(
+                children=[
+                    html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                    html.Div(teste2),
+                    html.Div(gValorTexto, style={'float': 'right'}),
+                ]
+            )
+
+            return fig, new_div.children
 
         @app.callback(
             [
@@ -552,10 +616,6 @@ class GraficosMetricas():
                 dff = dff[dff[filtraPelaColuna].notnull()]
 
                 fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
-                #markers=True ou #text='mensagem' #Pra LINE
-                #hover_data={'mensagem'}
-                #scatter
-                #Teste
 
                 #fig.update_traces(marker=dict(size=12,line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
                 fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
@@ -662,6 +722,3 @@ class GraficosMetricas():
 
         webbrowser.open('http://127.0.0.1:8050')
         app.run_server(debug=False)
-
-        funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.deleta_arquivos_auxiliares()

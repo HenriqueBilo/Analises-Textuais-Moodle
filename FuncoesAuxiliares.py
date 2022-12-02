@@ -15,8 +15,7 @@ class FuncoesAuxiliares():
         self.moodle_api = MoodleApi()
 
     def pega_informacoes_usuario(self):
-
-        while(True):
+        while True:
             usuario = input('Informe seu usuário (matrícula UFRGS): ')
             senha = input('Informe sua senha: ')
 
@@ -39,6 +38,7 @@ class FuncoesAuxiliares():
         print('Selecione a disciplina desejada: \n')
         contadorDisciplina = 0
         dicionarioDisciplinas = {}
+        print('0 - Sair')
         for curso in listaCursosUsuario.courses:
             contadorDisciplina = contadorDisciplina + 1
             dicionarioDisciplinas[contadorDisciplina] = listaCursosUsuario.courses[curso] + \
@@ -46,6 +46,8 @@ class FuncoesAuxiliares():
             print(str(contadorDisciplina) + ' - ' + listaCursosUsuario.courses[curso])
 
         disciplinaEscolhida = input()
+        if disciplinaEscolhida == '0':
+            return '0'
         nomeDisciplinaEscolhida = dicionarioDisciplinas[int(disciplinaEscolhida)]
         idDisciplinaEscolhida = int(nomeDisciplinaEscolhida.split('*')[1])
         return idDisciplinaEscolhida

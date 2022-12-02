@@ -25,6 +25,9 @@ if __name__ == '__main__':
     # Seleciona o curso
     id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
 
+    #if id_disciplina_escolhida == '0':
+        #break
+
     print('\n ------ Processando... Aguarde um momento ------')
 
     # Pega as mensagens dos chats do curso
@@ -59,3 +62,5 @@ if __name__ == '__main__':
     graficos_resultados = GraficosMetricas()
     graficos_resultados.cria_grafico_metricas()
 
+    funcoes_auxiliares = FuncoesAuxiliares()
+    funcoes_auxiliares.deleta_arquivos_auxiliares()
