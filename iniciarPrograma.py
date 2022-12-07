@@ -1,17 +1,17 @@
 #from pickle import FALSE
 
-from MoodleApi import *
-from Usuarios import *
-from Cursos import *
-from Foruns import *
-from Discussoes import *
-from Postagens import *
-from Chats import *
-from Autenticacao import *
-from LeituraCsvs import *
-from FuncoesAuxiliares import *
-from AnalisesResultados import *
-from GraficosMetricas import *
+from src.MoodleApi import *
+from src.Usuarios import *
+from src.Cursos import *
+from src.Foruns import *
+from src.Discussoes import *
+from src.Postagens import *
+from src.Chats import *
+from src.Autenticacao import *
+from src.LeituraCsvs import *
+from src.FuncoesAuxiliares import *
+from src.AnalisesResultados import *
+from src.GraficosMetricas import *
 
 import timeit
 
@@ -22,10 +22,12 @@ if __name__ == '__main__':
     # Pega informações do usuário
     lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
 
+
     # Seleciona o curso
     id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
 
-    #if id_disciplina_escolhida == '0':
+    if id_disciplina_escolhida == '0':
+        exit()
         #break
 
     print('\n ------ Processando... Aguarde um momento ------')
