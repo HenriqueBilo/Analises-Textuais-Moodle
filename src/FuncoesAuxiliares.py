@@ -121,6 +121,19 @@ class FuncoesAuxiliares():
 
                 csv_writer.writerow(linha)
 
+    def adiciona_nova_coluna_dict(self, input_file, output_file, coluna_nova, dict_valores_novos):
+        with open(input_file, 'r', encoding='utf-8') as read_obj, \
+            open(output_file, 'w', newline='', encoding='utf-8') as write_obj:
+            csv_reader = csv.reader(read_obj, delimiter='-')
+            csv_writer = csv.writer(write_obj, delimiter='-')
+            for i, linha in enumerate(csv_reader):
+                if i == 0:
+                    linha.append(coluna_nova)
+                else:
+                    linha.append(dict_valores_novos[i])
+
+                csv_writer.writerow(linha)
+
     def grava_csv_unico(self, retornoMensagensChats, retornoMensagensDiretas, retornoMensagensPostsForuns):
         with open('./data/dados_mensagens.csv', 'w', newline='', encoding='utf-8') as csvfilewrite:
             writer = csv.writer(csvfilewrite, delimiter='-')

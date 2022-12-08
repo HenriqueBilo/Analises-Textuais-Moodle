@@ -5,10 +5,11 @@ import numpy as np
 from src.FuncoesAuxiliares import *
 from concurrent.futures import ThreadPoolExecutor
 import time
+import collections
 
 class GooglePerspectiveApi():
 
-    def teste(self, frase, array_metricas, lock):
+    def teste(self, frase, indice_frase, dict_metricas, lock):
 
         while True:
             api_key = ''
@@ -23,6 +24,13 @@ class GooglePerspectiveApi():
 
                 try:
                     response = post(url=url, data=json.dumps(data_dict))
+                    #contador = 1
+                    '''while response.status_code != 200:
+                        time.sleep(1)
+                        response = post(url=url, data=json.dumps(data_dict))
+                        contador += 1
+                        #print('Entrou no retry')'''
+
                     response_dict = json.loads(response.content)
 
                     valor_profanidade = response_dict['attributeScores']['PROFANITY']['summaryScore']['value']
@@ -40,8 +48,8 @@ class GooglePerspectiveApi():
                                         'Insulto:' + str(valor_insulto) 
                     
                     #return valores_concatenados
-                    with lock:
-                        array_metricas.append(valores_concatenados)    
+                    #with lock:
+                    dict_metricas[indice_frase] = valores_concatenados
                     break
                     #lock.release()
                     
@@ -66,14 +74,15 @@ class GooglePerspectiveApi():
                                         'Toxidade:' + str(0) + '*' + \
                                         'Insulto:' + str(0) 
                 #return valores_concatenados
-                with lock:
-                    array_metricas.append(valores_concatenados)
+                #with lock:
+                dict_metricas[indice_frase] = valores_concatenados
                 break
                 #lock.release()
                 
 
     def chama_api_google_perspective(self, retornoMensagens):
         array_metricas = []
+        dict_metricas = {}
 
         pool = ThreadPoolExecutor()
 
@@ -84,10 +93,13 @@ class GooglePerspectiveApi():
             frase = retornoMensagens[i][1].replace('\\', '\\\\')
             #r'Prezados alunos,  Espero que estejam todos bem. Gostaríamos de avisar que estão disponíveis no Moodle da disciplina as notas e conceitos de  Cálculo Lambda e Teoria dos Tipos (Graduação)  Foundations for Rigorous Software Development (Pósgraduação)  Gostaríamos de pedir desculpas pela grande demora na correção da Lista 4 e entrega dos conceitos finais da disciplina. O reinício das atividades no formato ERE, em particular a gravação de videoaulas para demais disciplinas acabou contribuindo para esse atraso.  Sobre a recuperação de conceito: vamos solicitar que quem queira incrementar a sua nota/conceito, que nos envie até o final do semestre versões revisadas das listas enviadas previamente, contendo correções, até o último encontro da disciplina (na próxima semana).  Sobre a finalização das atividades, e correção das listas: gostaríamos de marcar um último encontro de despedida da disciplina:  ENCONTRO SÍNCRONO FINAL Data: próxima quintafeira, 26/Novembro Horário: 13:3015:30 Local: Mconf, link disponível no Moodle  A ideia é revisar as Listas de Exercícios, discutir o conteúdo do semestre como um todo e receber feedback de vocês sobre as melhorias que a disciplina pode ter para os próximos semestres.  Bom final de semestre a todos! Rodrigo e Alvaro' 
             #
-            pool.submit(self.teste, frase, array_metricas, lock) #Primeiro parametro é a função e os outros são os parametros pra função
+            pool.submit(self.teste, frase, i+1, dict_metricas, lock) #Primeiro parametro é a função e os outros são os parametros pra função
+            #time.sleep(2)
             #array_metricas.append(retorno.result())
 
         pool.shutdown(wait=True)
 
+        dict_emocoes_nrc_ordenado = collections.OrderedDict(sorted(dict_metricas.items()))
+
         funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.adiciona_nova_coluna('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', './data/dados_metricas.csv', 'GooglePerspectiveMetrics', array_metricas)
+        funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', './data/dados_metricas.csv', 'GooglePerspectiveMetrics', dict_emocoes_nrc_ordenado)

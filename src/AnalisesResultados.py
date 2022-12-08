@@ -9,6 +9,7 @@ import numpy as np
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 import timeit
+import collections
 
 from src.FuncoesAuxiliares import *
 from src.GooglePerspectiveApi import *
@@ -19,7 +20,7 @@ class AnalisesResultados():
         array_polaridade = []
 
         for i in range(len(retornoMensagens)):
-            frase = retornoMensagens[i][1]
+            frase = retornoMensagens[i][1].replace('\\', '\\\\')
             if frase is not np.nan:
                 retornoPolaridade = s.polarity_scores(frase)
                 #print('Frase: "', frase, '" tem compound no valor de: ', retornoPolaridade['compound'])
@@ -56,8 +57,7 @@ class AnalisesResultados():
         print('Facilidade de leitura da frase "', test_data.text, '": ', teste)
     '''
 
-    def teste(self, frase):
-        #Separar tudo aqui de dentro
+    def teste(self, frase, indice_frase, dict_emocoes_nrc):
         if frase is not np.nan:
             textstat.set_lang('en')
             translator = Translator()
@@ -74,26 +74,28 @@ class AnalisesResultados():
                 else:
                     emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao)
             if emocoes_sentenca == '':
-                return 'None'
-                #array_emocoes_nrc.append('None')
+                #return 'None'
+                dict_emocoes_nrc[indice_frase] = 'None'
             else:
-                return emocoes_sentenca
+                #return emocoes_sentenca
+                dict_emocoes_nrc[indice_frase] = emocoes_sentenca
                 #array_emocoes_nrc.append(emocoes_sentenca)
         else:
-            return np.nan
+            #return np.nan
+            dict_emocoes_nrc[frase] = np.nan
             #array_emocoes_nrc.append(np.nan)
 
     def analisa_nrc_lex(self, retornoMensagens):
         # TESTE API - NRCLex (emoções) e Yake (pega palavras mais usadas)
 
-        array_emocoes_nrc = []
+        dict_emocoes_nrc = {}
 
-        #pool = ThreadPoolExecutor()
+        pool = ThreadPoolExecutor()
 
         #with ThreadPoolExecutor() as executor:
         for i in range(len(retornoMensagens)): #Percorre todas mensagens
-            frase = retornoMensagens[i][1]
-            if frase is not np.nan:
+            frase = retornoMensagens[i][1].replace('\\', '\\\\')
+            '''if frase is not np.nan:
                 textstat.set_lang('en')
                 translator = Translator()
                 frase_traduzida = translator.translate(frase, src='pt', dest='en') #Traduz para inglês
@@ -113,14 +115,16 @@ class AnalisesResultados():
                 else:
                     array_emocoes_nrc.append(emocoes_sentenca)
             else:
-                array_emocoes_nrc.append(np.nan)
-            #retorno = executor.submit(self.teste, frase) #Primeiro parametro é a função e os outros são os parametros pra função
+                array_emocoes_nrc.append(np.nan)'''
+            pool.submit(self.teste, frase, i+1, dict_emocoes_nrc) #Primeiro parametro é a função e os outros são os parametros pra função
             #array_emocoes_nrc.append(retorno)
 
-        #pool.shutdown(wait=True)
+        pool.shutdown(wait=True)
+
+        dict_emocoes_nrc_ordenado = collections.OrderedDict(sorted(dict_emocoes_nrc.items()))
 
         funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.adiciona_nova_coluna('./data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', 'NRC_EMOTIONS', array_emocoes_nrc)
+        funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', 'NRC_EMOTIONS', dict_emocoes_nrc_ordenado)
 
     def chamada_google_perspectiveApi(self, retornoMensagens):
         chamada_google_perspective_api = GooglePerspectiveApi()
