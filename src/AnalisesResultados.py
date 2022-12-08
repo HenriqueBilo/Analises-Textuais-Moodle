@@ -7,6 +7,8 @@ from nrclex import NRCLex  # NrcLex para análise de emoções
 import pandas as pd
 import numpy as np
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
+import timeit
 
 from src.FuncoesAuxiliares import *
 from src.GooglePerspectiveApi import *
@@ -54,43 +56,52 @@ class AnalisesResultados():
         print('Facilidade de leitura da frase "', test_data.text, '": ', teste)
     '''
 
+    def teste(self, frase):
+        #Separar tudo aqui de dentro
+        if frase is not np.nan:
+            textstat.set_lang('en')
+            translator = Translator()
+            frase_traduzida = translator.translate(frase, src='pt', dest='en') #Traduz para inglês
+
+            emotion = NRCLex(frase_traduzida.text) #Obter classificação
+
+            emocoes_sentenca = ''
+            for i in range(len(emotion.top_emotions)): #Percorre todas classificações (umas 10)
+                nome_emocao = emotion.top_emotions[i][0]
+                valor_emocao = emotion.top_emotions[i][1]
+                if i+1 != len(emotion.top_emotions):
+                    emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao) + '*'
+                else:
+                    emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao)
+            if emocoes_sentenca == '':
+                return 'None'
+                #array_emocoes_nrc.append('None')
+            else:
+                return emocoes_sentenca
+                #array_emocoes_nrc.append(emocoes_sentenca)
+        else:
+            return np.nan
+            #array_emocoes_nrc.append(np.nan)
+
     def analisa_nrc_lex(self, retornoMensagens):
         # TESTE API - NRCLex (emoções) e Yake (pega palavras mais usadas)
 
         array_emocoes_nrc = []
 
-        #teste = ['i will abandon you', 'i am very sad', 'the life is amazing']
+        #pool = ThreadPoolExecutor()
 
-        for i in range(len(retornoMensagens)):
+        #with ThreadPoolExecutor() as executor:
+        for i in range(len(retornoMensagens)): #Percorre todas mensagens
             frase = retornoMensagens[i][1]
-            #'Olá a todos, Nova regra (e não acredito que tenho que dizer isso), por favor, não dê à luz no canal de voz. Isso deixa as pessoas muito desconfortáveis.' #teste[i]
-
             if frase is not np.nan:
                 textstat.set_lang('en')
                 translator = Translator()
-                frase_traduzida = translator.translate(frase, src='pt', dest='en')
-                #print('Texto traduzido: ', frase_traduzida.text)
-                
-                '''kw_extractor = yake.KeywordExtractor(lan='pt')
-                keywords = kw_extractor.extract_keywords(frase)
+                frase_traduzida = translator.translate(frase, src='pt', dest='en') #Traduz para inglês
 
-                for kw in keywords:
-                    print(kw)
-
-                    # creating objects
-                    emotion = NRCLex(kw[0])
-
-                    # Classify emotion
-                    print('\n\n', kw[0], ': ', emotion.top_emotions)'''
-
-                #NRC-Emotion-Lexicon-v0.92/NRC-emotion-lexicon-wordlevel-alphabetized-v0.92.txt
-
-                emotion = NRCLex(frase_traduzida.text)
-                # Classify emotion
-                #print('\n\n', frase, ': ', emotion.top_emotions)
+                emotion = NRCLex(frase_traduzida.text) #Obter classificação
 
                 emocoes_sentenca = ''
-                for i in range(len(emotion.top_emotions)):
+                for i in range(len(emotion.top_emotions)): #Percorre todas classificações (umas 10)
                     nome_emocao = emotion.top_emotions[i][0]
                     valor_emocao = emotion.top_emotions[i][1]
                     if i+1 != len(emotion.top_emotions):
@@ -103,6 +114,10 @@ class AnalisesResultados():
                     array_emocoes_nrc.append(emocoes_sentenca)
             else:
                 array_emocoes_nrc.append(np.nan)
+            #retorno = executor.submit(self.teste, frase) #Primeiro parametro é a função e os outros são os parametros pra função
+            #array_emocoes_nrc.append(retorno)
+
+        #pool.shutdown(wait=True)
 
         funcoes_auxiliares = FuncoesAuxiliares()
         funcoes_auxiliares.adiciona_nova_coluna('./data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', 'NRC_EMOTIONS', array_emocoes_nrc)
@@ -174,13 +189,25 @@ class AnalisesResultados():
         #Atualiza a variavel contendo as mensagens
         retorno_mensagens = pd.read_csv('./data/dados_mensagens_aux_polaridade.csv', sep='-')
         
+        start_nrc = timeit.default_timer()
+
         #Analisa emoções utilizando NRCLex
         self.analisa_nrc_lex(retorno_mensagens.loc[:].values)
 
+        end_nrc = timeit.default_timer()
+
+        print('Tempo NRC: ' + str(end_nrc-start_nrc))
+
         retorno_mensagens = pd.read_csv('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', sep='-')
+
+        start_google = timeit.default_timer()
 
         # Analisa Google Perspective API
         self.chamada_google_perspectiveApi(retorno_mensagens.loc[:].values)
+
+        end_google = timeit.default_timer()
+
+        print('Tempo GOOGLE: ' + str(end_google-start_google))
 
         # Classifica as mensagens
 

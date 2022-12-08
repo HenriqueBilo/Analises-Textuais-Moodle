@@ -139,7 +139,7 @@ class FuncoesAuxiliares():
         #Deleta arquivos auxiliares
         array_arquivos_deletar = ['./data/dados_chats_mensagens.csv', './data/dados_cursos.csv', './data/dados_discussions.csv', './data/dados_foruns.csv', 
                                 './data/dados_mensagens_diretas.csv', './data/dados_posts.csv', './data/dados_usuario.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv',
-                                './data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens.csv']
+                                './data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens.csv', './data/dados_metricas_finais.csv', './data/dados_metricas.csv']
 
         for arquivo in array_arquivos_deletar:
             if os.path.isfile(arquivo):
