@@ -17,52 +17,54 @@ import timeit
 
 if __name__ == '__main__':
 
-    funcoes_auxiliares = FuncoesAuxiliares()
+    id_disciplina_escolhida = ''
+    while id_disciplina_escolhida != 0:
 
-    # Pega informações do usuário
-    lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
+        funcoes_auxiliares = FuncoesAuxiliares()
 
+        # Pega informações do usuário
+        lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
 
-    # Seleciona o curso
-    id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
+        # Seleciona o curso
+        id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
 
-    if id_disciplina_escolhida == '0':
-        exit()
-        #break
+        if id_disciplina_escolhida == '0':
+            exit()
+            #break
 
-    print('\n ------ Processando... Aguarde um momento ------')
+        print('\n ------ Processando... Aguarde um momento ------')
 
-    # Pega as mensagens dos chats do curso
-    cursos_array = funcoes_auxiliares.coleta_mensagens_chat_do_curso(id_disciplina_escolhida)
+        # Pega as mensagens dos chats do curso
+        cursos_array = funcoes_auxiliares.coleta_mensagens_chat_do_curso(id_disciplina_escolhida)
 
-    # Pega as direct messages
-    funcoes_auxiliares.coleta_mensagens_diretas_ao_professor(cursos_array, id_usuario_buscado)
+        # Pega as direct messages
+        funcoes_auxiliares.coleta_mensagens_diretas_ao_professor(cursos_array, id_usuario_buscado)
 
-    # Pega as mensagens dos fóruns
-    funcoes_auxiliares.coleta_mensagens_dos_foruns(cursos_array)
+        # Pega as mensagens dos fóruns
+        funcoes_auxiliares.coleta_mensagens_dos_foruns(cursos_array)
 
-    leitura_arquivos = LeituraCsvs()
+        leitura_arquivos = LeituraCsvs()
 
-    retornoMensagensChats = leitura_arquivos.get_dados_chats_mensagens()
-    retornoMensagensDiretas = leitura_arquivos.get_dados_mensagens_diretas()
-    retornoMensagensPostsForuns = leitura_arquivos.get_dados_posts()
+        retornoMensagensChats = leitura_arquivos.get_dados_chats_mensagens()
+        retornoMensagensDiretas = leitura_arquivos.get_dados_mensagens_diretas()
+        retornoMensagensPostsForuns = leitura_arquivos.get_dados_posts()
 
-    #Preparação Dados para análise
-    funcoes_auxiliares.grava_csv_unico(retornoMensagensChats.loc[:].values, retornoMensagensDiretas.loc[:].values, retornoMensagensPostsForuns.loc[:].values)
+        #Preparação Dados para análise
+        funcoes_auxiliares.grava_csv_unico(retornoMensagensChats.loc[:].values, retornoMensagensDiretas.loc[:].values, retornoMensagensPostsForuns.loc[:].values)
 
-    retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
+        retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
 
-    #start = timeit.default_timer()
+        #start = timeit.default_timer()
 
-    analises_resultados = AnalisesResultados()
-    analises_resultados.analise_metricas(retornoMensagens.loc[:].values)  #Problema de demora ta aqui, 46 segundos no curso de Excell
+        analises_resultados = AnalisesResultados()
+        analises_resultados.analise_metricas(retornoMensagens.loc[:].values)  #Problema de demora ta aqui, 46 segundos no curso de Excell
 
-    #end = timeit.default_timer()
+        #end = timeit.default_timer()
 
-    #print('TESTEEEEEE: ' + str(end-start))
+        #print('TESTEEEEEE: ' + str(end-start))
 
-    graficos_resultados = GraficosMetricas()
-    graficos_resultados.cria_grafico_metricas()
+        graficos_resultados = GraficosMetricas()
+        graficos_resultados.cria_grafico_metricas()
 
-    funcoes_auxiliares = FuncoesAuxiliares()
-    funcoes_auxiliares.deleta_arquivos_auxiliares()
+        funcoes_auxiliares = FuncoesAuxiliares()
+        funcoes_auxiliares.deleta_arquivos_auxiliares()

@@ -275,7 +275,7 @@ class GraficosMetricas():
                 html.Div([
                     
                     html.Label(
-                        ['Escolha um Aluno:'],
+                        ['Escolha o Aluno:'],
                         style={'font-weight': 'bold', 'text-align': 'left'},
                     ),
                     dcc.Dropdown(id='cboAlunoPolaridade',
@@ -285,7 +285,7 @@ class GraficosMetricas():
                         disabled=False,
                         clearable=True,
                         searchable=True,
-                        placeholder='Escolha um Aluno...',
+                        placeholder='Escolha o Aluno...',
                         className='form-dropdown',
                         style={'width':"90%"},
                         persistence='string',
@@ -297,7 +297,7 @@ class GraficosMetricas():
                 ],className='one column'),
 
                 html.Div([
-                    html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    html.Label(['Escolha o período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
                     dcc.DatePickerRange(
                         id="dateRangePolaridade",
                         min_date_allowed='',
@@ -340,7 +340,7 @@ class GraficosMetricas():
                 html.Div([
                     
                     html.Label(
-                        ['Escolha um Aluno:'],
+                        ['Escolha o(s) Aluno(s):'],
                         style={'font-weight': 'bold', 'text-align': 'left'},
                     ),
                     dcc.Dropdown(id='cboAlunos',
@@ -350,7 +350,7 @@ class GraficosMetricas():
                         disabled=False,
                         clearable=True,
                         searchable=True,
-                        placeholder='Escolha um Aluno...',
+                        placeholder='Escolha o(s) Aluno(s)...',
                         className='form-dropdown',
                         style={'width':'90%'},
                         persistence='string',
@@ -382,7 +382,7 @@ class GraficosMetricas():
                 ],className='one column'),
 
                 html.Div([
-                    html.Label(['Escolha um período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    html.Label(['Escolha o período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
                     dcc.DatePickerRange(
                         id="dateRangeMetricas",
                         min_date_allowed='',
@@ -441,199 +441,197 @@ class GraficosMetricas():
             dff = df[(df['idUsuario'] == aluno) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
             #fig = px.bar(df[mask], x='data', y='polaridade', color='idUsuario')
             
-            cores = []
-            for polaridade in dff['polaridade']:
-                if float(polaridade) >= 0:
-                    cores.append('green')
-                else:
-                    cores.append('red')
+            if len(dff['polaridade']) > 0:
+                cores = []
+                for polaridade in dff['polaridade']:
+                    if float(polaridade) >= 0:
+                        cores.append('green')
+                    else:
+                        cores.append('red')
 
-            fig = {
-                'data': 
-                [
-                    {'x': dff['data'], 'y': dff['polaridade'], 'type': 'bar', 'marker' : { 'color' : cores}},
-                    #{'x': df['data'], 'y': df['polaridade'], 'type': 'bar', 'name': u'Montréal'},
-                ],
-                'layout': {
-                    'title': 'Visualização da Métrica \'Polaridade\' por Aluno',
-                    'xaxis': {
-                        'title': 'DATA'
+                dff['cores_polaridade'] = cores
+
+                fig = px.bar(dff, x=dff['data'], y=dff['polaridade'], 
+                    color=dff['cores_polaridade'],
+                    color_discrete_map={
+                        'green': 'green',
+                        'red': 'red'
                     },
-                    'yaxis': {
-                        'title': 'POLARIDADE'
-                    },
-                    'font': {
-                        'size': 15,
-                        'x': 0.5,
-                        'xanchor': 'center'
-                    },
-                    'height': 600,
-                }
-            }
+                    labels=dict(data="DATA", polaridade="POLARIDADE"),
+                    title='Visualização da Métrica \'Polaridade\' por Aluno', 
+                    height=600)
 
-            #Tratamento pro Click do ponto
-            gValorTexto = ''
-            gCabecalhoTexto = ''
-            gStringClassificacao = ''
-            vet_datas_mensagens_procuradas = []
+                fig.update_layout(title_text='Visualização da Métrica \'Polaridade\' por Aluno', title_x=0.5)
 
-            if clickData is not None:
-                for indicePoints in range(len(clickData['points'])):
-                    vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
+                fig.update_layout({
+                    'showlegend':False,
+                })
 
-                vet_alunos_mensagens_verificadas = []
-                vet_mensagens_verificadas = []
+                #Tratamento pro Click do ponto
+                gValorTexto = ''
+                gCabecalhoTexto = ''
+                gStringClassificacao = ''
+                vet_datas_mensagens_procuradas = []
 
-                for i, data_df in enumerate(dff['data'].values):
-                    for data_mensagem_procurada in vet_datas_mensagens_procuradas:
-                        if data_mensagem_procurada == data_df:
-                            #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
-                            if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
-                                vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
-                                vet_mensagens_verificadas.append(dff['mensagem'].values[i])
-                                classificacoes = dff['classificacao'].values[i].split(',')
-                                gStringClassificacao = ''
-                                b_tem_classificacao = False
-                                for j in range(len(classificacoes)):
-                                    classificacao = classificacoes[j][1:].replace("'", "").upper()
-                                    if(classificacao != ']'):
-                                        b_tem_classificacao = True
-                                        gStringClassificacao += '[' + classificacao.replace(']', '') + ']'
+                if clickData is not None:
+                    for indicePoints in range(len(clickData['points'])):
+                        vet_datas_mensagens_procuradas.append(clickData['points'][indicePoints]['x'])
 
-                                if len(vet_mensagens_verificadas) <= 1:
-                                    if b_tem_classificacao:
-                                        gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': ' # + string_de_classificacao + ': '
+                    vet_alunos_mensagens_verificadas = []
+                    vet_mensagens_verificadas = []
+
+                    for i, data_df in enumerate(dff['data'].values):
+                        for data_mensagem_procurada in vet_datas_mensagens_procuradas:
+                            if data_mensagem_procurada == data_df:
+                                #dff['idUsuario'].values[i] not in vet_alunos_mensagens_verificadas and 
+                                if dff['mensagem'].values[i] not in vet_mensagens_verificadas:
+                                    vet_alunos_mensagens_verificadas.append(dff['idUsuario'].values[i])
+                                    vet_mensagens_verificadas.append(dff['mensagem'].values[i])
+                                    classificacoes = dff['classificacao'].values[i].split(',')
+                                    gStringClassificacao = ''
+                                    b_tem_classificacao = False
+                                    for j in range(len(classificacoes)):
+                                        classificacao = classificacoes[j][1:].replace("'", "").upper()
+                                        if(classificacao != ']'):
+                                            b_tem_classificacao = True
+                                            gStringClassificacao += '[' + classificacao.replace(']', '') + ']'
+
+                                    if len(vet_mensagens_verificadas) <= 1:
+                                        if b_tem_classificacao:
+                                            gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': ' # + string_de_classificacao + ': '
+                                        else:
+                                            gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+
+                                    if len(vet_mensagens_verificadas) > 1:
+                                        gValorTexto += '&nbsp;&nbsp;' + dff['mensagem'].values[i] 
                                     else:
-                                        gCabecalhoTexto = 'ALUNO ' + str(dff['idUsuario'].values[i]) + ': '
+                                        gValorTexto += dff['mensagem'].values[i]
+                
+                corClassificacao = ''
+                indices_adicionados_classificacao_children = []
 
-                                if len(vet_mensagens_verificadas) > 1:
-                                    gValorTexto += '&nbsp;&nbsp;' + dff['mensagem'].values[i] 
-                                else:
-                                    gValorTexto += dff['mensagem'].values[i]
-            
-            corClassificacao = ''
-            indices_adicionados_classificacao_children = []
+                if gStringClassificacao != '':
+                    vetClassificacao = gStringClassificacao.split(']')
+                    for i in range(len(vetClassificacao)):
+                        if vetClassificacao[i] != '':
+                            vetClassificacao[i] += ']'
+                            if vetClassificacao[i] == '[AGRESSÃO]':
+                                corClassificacao = 'red'
+                            elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
+                                corClassificacao = 'orange'
+                            elif vetClassificacao[i] == '[ELOGIO]':
+                                corClassificacao = 'green'
+                            else:
+                                corClassificacao = 'black'
 
-            if gStringClassificacao != '':
-                vetClassificacao = gStringClassificacao.split(']')
-                for i in range(len(vetClassificacao)):
-                    if vetClassificacao[i] != '':
-                        vetClassificacao[i] += ']'
-                        if vetClassificacao[i] == '[AGRESSÃO]':
-                            corClassificacao = 'red'
-                        elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
-                            corClassificacao = 'orange'
-                        elif vetClassificacao[i] == '[ELOGIO]':
-                            corClassificacao = 'green'
+                            nova_div = html.Div(
+                                children=[
+                                    html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
+                                ]
+                            )
+
+                            indices_adicionados_classificacao_children.append(len(children))
+                            children.append(nova_div)
+
+                conteudo_classificacao = {}
+                if len(indices_adicionados_classificacao_children) > 0:
+                    for i in range(len(indices_adicionados_classificacao_children)):
+                        if i == 0:
+                            teste = children[indices_adicionados_classificacao_children[i]]
                         else:
-                            corClassificacao = 'black'
+                            teste.children.append(children[indices_adicionados_classificacao_children[i]])
+                    conteudo_classificacao = teste
 
-                        nova_div = html.Div(
-                            children=[
-                                html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
-                            ]
-                        )
+                indices_mensagens_adicionadas_children = [] #Zera os indices
+                if '&nbsp;&nbsp;' in gValorTexto: #Se tem que quebrar linha entre as mensagens
+                    gValorTexto = gValorTexto.split('&nbsp;&nbsp;')
+                    for frase_selecionada in range(len(gValorTexto)):
+                        indice_dataFrame_mensagem = dff[dff['mensagem'] == gValorTexto[frase_selecionada]].index.values.astype(int)[0]
+                        classificacao_mensagem_atual = dff['classificacao'][indice_dataFrame_mensagem]
+                        gStringClassificacao = ''
 
-                        indices_adicionados_classificacao_children.append(len(children))
-                        children.append(nova_div)
+                        classificacoes = classificacao_mensagem_atual.split(',')
+                        for j in range(len(classificacoes)):
+                            classificacao = classificacoes[j][1:].replace("'", "").upper()
+                            if(classificacao != ']'):
+                                gStringClassificacao += '[' + classificacao.replace(']','') + ']'
 
-            conteudo_classificacao = {}
-            if len(indices_adicionados_classificacao_children) > 0:
-                for i in range(len(indices_adicionados_classificacao_children)):
-                    if i == 0:
-                        teste = children[indices_adicionados_classificacao_children[i]]
-                    else:
-                        teste.children.append(children[indices_adicionados_classificacao_children[i]])
-                conteudo_classificacao = teste
+                        if gStringClassificacao != '':
+                            vetClassificacao = gStringClassificacao.split(']')
+                            for i in range(len(vetClassificacao)):
+                                if vetClassificacao[i] != '':
+                                    vetClassificacao[i] += ']'
+                                    if vetClassificacao[i] == '[AGRESSÃO]':
+                                        corClassificacao = 'red'
+                                    elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
+                                        corClassificacao = 'orange'
+                                    elif vetClassificacao[i] == '[ELOGIO]':
+                                        corClassificacao = 'green'
+                                    else:
+                                        corClassificacao = 'black'
 
-            indices_mensagens_adicionadas_children = [] #Zera os indices
-            if '&nbsp;&nbsp;' in gValorTexto: #Se tem que quebrar linha entre as mensagens
-                gValorTexto = gValorTexto.split('&nbsp;&nbsp;')
-                for frase_selecionada in range(len(gValorTexto)):
-                    indice_dataFrame_mensagem = dff[dff['mensagem'] == gValorTexto[frase_selecionada]].index.values.astype(int)[0]
-                    classificacao_mensagem_atual = dff['classificacao'][indice_dataFrame_mensagem]
-                    gStringClassificacao = ''
+                                    nova_div_classificacao = html.Div(
+                                        children=[
+                                            html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
+                                        ]
+                                    )
+                            div_separando_mensagens = html.Div(
+                                children=[
+                                    html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                                    nova_div_classificacao,
+                                    html.Br(),
+                                    html.Div(gValorTexto[frase_selecionada], style={})
+                                ]
+                            )
 
-                    classificacoes = classificacao_mensagem_atual.split(',')
-                    for j in range(len(classificacoes)):
-                        classificacao = classificacoes[j][1:].replace("'", "").upper()
-                        if(classificacao != ']'):
-                            gStringClassificacao += '[' + classificacao.replace(']','') + ']'
+                            indices_mensagens_adicionadas_children.append(len(children))
+                            children.append(div_separando_mensagens)
+                        else:
+                            div_separando_mensagens = html.Div(
+                                children=[
+                                    html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                                    html.Br(),
+                                    html.Div(gValorTexto[frase_selecionada], style={})
+                                ]
+                            )
 
-                    if gStringClassificacao != '':
-                        vetClassificacao = gStringClassificacao.split(']')
-                        for i in range(len(vetClassificacao)):
-                            if vetClassificacao[i] != '':
-                                vetClassificacao[i] += ']'
-                                if vetClassificacao[i] == '[AGRESSÃO]':
-                                    corClassificacao = 'red'
-                                elif vetClassificacao[i] == '[RECLAMAÇÃO]' or vetClassificacao[i] == '[INSATISFAÇÃO]':
-                                    corClassificacao = 'orange'
-                                elif vetClassificacao[i] == '[ELOGIO]':
-                                    corClassificacao = 'green'
-                                else:
-                                    corClassificacao = 'black'
+                            indices_mensagens_adicionadas_children.append(len(children))
+                            children.append(div_separando_mensagens)
 
-                                nova_div_classificacao = html.Div(
-                                    children=[
-                                        html.Div(vetClassificacao[i], style={'color': corClassificacao, 'float': 'left'})
-                                    ]
-                                )
-                        div_separando_mensagens = html.Div(
-                            children=[
-                                html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
-                                nova_div_classificacao,
-                                html.Br(),
-                                html.Div(gValorTexto[frase_selecionada], style={})
-                            ]
-                        )
+                conteudo_mensagem_mesmo_usuario = {}
+                if len(indices_mensagens_adicionadas_children) > 0:
+                    for i in range(len(indices_mensagens_adicionadas_children)):
+                        if i == 0:
+                            teste = children[indices_mensagens_adicionadas_children[i]]
+                        else:
+                            teste.children.append(children[indices_mensagens_adicionadas_children[i]])
+                    conteudo_mensagem_mesmo_usuario = teste
 
-                        indices_mensagens_adicionadas_children.append(len(children))
-                        children.append(div_separando_mensagens)
-                    else:
-                        div_separando_mensagens = html.Div(
-                            children=[
-                                html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
-                                html.Br(),
-                                html.Div(gValorTexto[frase_selecionada], style={})
-                            ]
-                        )
+                if len(indices_mensagens_adicionadas_children) > 0 : #Tratamento para caso de múltiplas mensagens de um mesmo usuário
+                    #html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                    #html.Div(conteudo_classificacao),
+                    #html.Br(),
+                    new_div = html.Div(
+                        children=[
+                            html.Div(conteudo_mensagem_mesmo_usuario, style={}),
+                            html.Br(),
+                        ]
+                    )
 
-                        indices_mensagens_adicionadas_children.append(len(children))
-                        children.append(div_separando_mensagens)
+                else:
+                    new_div = html.Div(
+                        children=[
+                            html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
+                            html.Div(conteudo_classificacao),
+                            html.Br(),
+                            html.Div(gValorTexto, style={}),
+                            html.Br(),
+                        ]
+                    )
 
-            conteudo_mensagem_mesmo_usuario = {}
-            if len(indices_mensagens_adicionadas_children) > 0:
-                for i in range(len(indices_mensagens_adicionadas_children)):
-                    if i == 0:
-                        teste = children[indices_mensagens_adicionadas_children[i]]
-                    else:
-                        teste.children.append(children[indices_mensagens_adicionadas_children[i]])
-                conteudo_mensagem_mesmo_usuario = teste
-
-            if len(indices_mensagens_adicionadas_children) > 0 : #Tratamento para caso de múltiplas mensagens de um mesmo usuário
-                #html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
-                #html.Div(conteudo_classificacao),
-                #html.Br(),
-                new_div = html.Div(
-                    children=[
-                        html.Div(conteudo_mensagem_mesmo_usuario, style={}),
-                        html.Br(),
-                    ]
-                )
-
+                return fig, new_div.children
             else:
-                new_div = html.Div(
-                    children=[
-                        html.Div(gCabecalhoTexto, style={'color': 'black', 'font-weight': 'bold','float': 'left'}),
-                        html.Div(conteudo_classificacao),
-                        html.Br(),
-                        html.Div(gValorTexto, style={}),
-                        html.Br(),
-                    ]
-                )
-
-            return fig, new_div.children
+                return '', ''
 
         @app.callback(
             [
@@ -687,7 +685,12 @@ class GraficosMetricas():
                 dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
                 dff = dff[dff[filtraPelaColuna].notnull()]
 
-                fig = px.line(dff, x='data', y=filtraPelaColuna, color='idUsuario', height=600) 
+                fig = px.line(dff, 
+                    x='data', 
+                    y=filtraPelaColuna, 
+                    color='idUsuario', 
+                    labels=dict(idUsuario="USUÁRIO(S)"),
+                    height=600) 
 
                 #fig.update_traces(marker=dict(size=12,line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
                 fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
@@ -697,6 +700,8 @@ class GraficosMetricas():
                                 title={'text':'Visualização Métricas Gerais',
                                 'font':{'size':20},'x':0.5,'xanchor':'center'},
                                 hovermode='x')
+
+                
                 
                 #Tratamento pro Click do ponto
                 gValorTexto = ''

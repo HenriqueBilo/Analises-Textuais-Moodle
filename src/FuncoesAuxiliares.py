@@ -35,7 +35,6 @@ class FuncoesAuxiliares():
         return listaCursosUsuario, idUsuarioBuscado
 
     def menu_selecao_curso(self, listaCursosUsuario):
-        print('Selecione a disciplina desejada: \n')
         contadorDisciplina = 0
         dicionarioDisciplinas = {}
         print('0 - Sair')
@@ -45,11 +44,12 @@ class FuncoesAuxiliares():
                 ' * ' + str(curso)
             print(str(contadorDisciplina) + ' - ' + listaCursosUsuario.courses[curso])
 
-        disciplinaEscolhida = input()
+        disciplinaEscolhida = input('\nDigite o número da disciplina desejada para realizar a análise: ')
         if disciplinaEscolhida == '0':
             return '0'
         nomeDisciplinaEscolhida = dicionarioDisciplinas[int(disciplinaEscolhida)]
         idDisciplinaEscolhida = int(nomeDisciplinaEscolhida.split('*')[1])
+        
         return idDisciplinaEscolhida
 
     def coleta_mensagens_chat_do_curso(self, idDisciplinaEscolhida):
