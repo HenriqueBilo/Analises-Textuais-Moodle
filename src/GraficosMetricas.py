@@ -8,11 +8,9 @@ import plotly.express as px
 from src.FuncoesAuxiliares import *
 import webbrowser
 from datetime import date
-from collections import defaultdict
 
 class GraficosMetricas():
     def formata_data(self, data):
-        #2022-07-15 00:00:00
         data_formato_antigo = str(data).split(' ')[0]
         vetor_data = data_formato_antigo.split('-')
         return vetor_data[2] + '/' + vetor_data[1] + '/' + vetor_data[0]
@@ -24,12 +22,13 @@ class GraficosMetricas():
             if '*' in emotion:
                 todas_emocoes = emotion.split('*')
                 for unica_emocao in todas_emocoes:
-                    nome_emocao = unica_emocao.split(':')[0]
-                    valor_emocao = unica_emocao.split(':')[1]
+                    if unica_emocao != '':
+                        nome_emocao = unica_emocao.split(':')[0]
+                        valor_emocao = unica_emocao.split(':')[1]
 
-                    nome_emocao = self.traduz_emocoes_nrc(nome_emocao)
+                        nome_emocao = self.traduz_emocoes_nrc(nome_emocao)
 
-                    dicionario_retorno[nome_emocao.upper()] = valor_emocao
+                        dicionario_retorno[nome_emocao.upper()] = valor_emocao
             else:
                 nome_emocao = emotion.split(':')[0]
                 valor_emocao = emotion.split(':')[1]
@@ -46,7 +45,7 @@ class GraficosMetricas():
         elif emocao == 'anger':
             return 'Raiva'
         elif emocao == 'anticipation':
-            return 'Antecipação'
+            return 'Ansiedade'
         elif emocao == 'trust':
             return 'Confiança'
         elif emocao == 'surprise':
@@ -58,7 +57,7 @@ class GraficosMetricas():
         elif emocao == 'sadness':
             return 'Tristeza'
         elif emocao == 'disgust':
-            return 'Desgosto'
+            return 'Nojo'
         else:
             return 'Alegria'
 
@@ -129,55 +128,59 @@ class GraficosMetricas():
 
         #Pra fechar o numero de linhas do dataframe
         while len(array_nome_nrc_emocoes) < len(df.index):
-            array_nome_nrc_emocoes.append('CONFIANÇA')
+            array_nome_nrc_emocoes.append('None')
 
         for i, dados in enumerate(retorno_nrc_emocoes):
             if len(dados) != 0:
                 for nrc_emocao in dados:
                     dict_nrc_emocoes[nrc_emocao].append(float(dados[nrc_emocao]))
                 for emocao in array_nome_nrc_emocoes:
-                    while len(dict_nrc_emocoes[emocao]) < i + 1:
-                        dict_nrc_emocoes[emocao].append(np.nan)  
+                    if emocao != 'None':
+                        while len(dict_nrc_emocoes[emocao]) < i + 1:
+                            dict_nrc_emocoes[emocao].append(np.nan)  
             else:
                 for chave in dict_nrc_emocoes.keys():
                     dict_nrc_emocoes[chave].append(np.nan)
 
         #NRC - Tratamento valores de cada emoção (1 coluna pra cada)
         for emocao_nrc in array_nome_nrc_emocoes:
-            df[emocao_nrc] = dict_nrc_emocoes[emocao_nrc]   
+            if emocao_nrc != 'None':
+                df[emocao_nrc] = dict_nrc_emocoes[emocao_nrc]   
 
         #NRC - Cria colunas para saber qual linha tem determinada emoção
         for i, linha in df.iterrows():
             if hasattr(linha, 'CONFIANÇA'):
                 df.at[i,'TEM_CONFIANÇA'] = 'CONFIANÇA'
-            #if linha.trust != '0':
-            if hasattr(linha, 'POSITIVO'):
-                #if linha.positive != '0':
-                df.at[i,'TEM_POSITIVO'] = 'POSITIVO'
+            else:
+                df.at[i,'TEM_CONFIANÇA'] = 'NONE'
             if hasattr(linha, 'MEDO'):
-                #if linha.fear != '0':
                 df.at[i,'TEM_MEDO'] = 'MEDO'
+            else:
+                df.at[i,'TEM_MEDO'] = 'NONE'
             if hasattr(linha, 'RAIVA'):
-                #if linha.anger != '0':
                 df.at[i,'TEM_RAIVA'] = 'RAIVA'
-            if hasattr(linha, 'ANTECIPAÇÃO'):
-                #if linha.anticipation != '0':
-                df.at[i,'TEM_ANTECIPAÇÃO'] = 'ANTECIPAÇÃO'
+            else:
+                df.at[i,'TEM_RAIVA'] = 'NONE'
+            if hasattr(linha, 'ANSIEDADE'):
+                df.at[i,'TEM_ANSIEDADE'] = 'ANSIEDADE'
+            else:
+                df.at[i,'TEM_ANSIEDADE'] = 'NONE'
             if hasattr(linha, 'SURPRESA'):
-                #if linha.surprise != '0':
                 df.at[i,'TEM_SURPRESA'] = 'SURPRESA'
-            if hasattr(linha, 'NEGATIVO'):
-                #if linha.negative != '0':
-                df.at[i,'TEM_NEGATIVO'] = 'NEGATIVO'
+            else:
+                df.at[i,'TEM_SURPRESA'] = 'NONE'
             if hasattr(linha, 'TRISTEZA'):
-                #if linha.sadness != '0':
                 df.at[i,'TEM_TRISTEZA'] = 'sadness'
-            if hasattr(linha, 'DESGOSTO'):
-                #if linha.disgust != '0':
-                df.at[i,'TEM_DESGOSTO'] = 'DESGOSTO'
+            else:
+                df.at[i,'TEM_TRISTEZA'] = 'NONE'
+            if hasattr(linha, 'NOJO'):
+                df.at[i,'TEM_NOJO'] = 'NOJO'
+            else:
+                df.at[i,'TEM_NOJO'] = 'NONE'
             if hasattr(linha, 'ALEGRIA'):
-                #if linha.joy != '0':
                 df.at[i,'TEM_ALEGRIA'] = 'ALEGRIA'
+            else:
+                df.at[i,'TEM_ALEGRIA'] = 'NONE'
 
         #df = df.drop(labels='mensagem', axis=1) #Teste
         df = df.drop(labels='NRC_EMOTIONS', axis=1) #Teste
@@ -233,9 +236,24 @@ class GraficosMetricas():
         #Cria dataFrame para o combo de emoções
         df_combos = pd.DataFrame()
 
+
+        #Teste
+
+        array_nome_nrc_emocoes.append('RAIVA')
+        array_nome_nrc_emocoes.append('ANSIEDADE')
+        array_nome_nrc_emocoes.append('NOJO')
+        array_nome_nrc_emocoes.append('MEDO')
+        array_nome_nrc_emocoes.append('ALEGRIA')
+        array_nome_nrc_emocoes.append('TRISTEZA')
+        array_nome_nrc_emocoes.append('SURPRESA')
+        array_nome_nrc_emocoes.append('CONFIANÇA')
+
+        #Teste
+
         for i in range(len(array_nome_nrc_emocoes)):
             if array_nome_nrc_emocoes[i] not in array_nome_google_emocoes:
-                array_nome_google_emocoes.append(array_nome_nrc_emocoes[i])
+                if array_nome_nrc_emocoes[i] != 'None':
+                    array_nome_google_emocoes.append(array_nome_nrc_emocoes[i])
 
         data = {'EMOCOES_COMBO': array_nome_google_emocoes}
         df_combos['EMOCOES_COMBO'] = data['EMOCOES_COMBO']
@@ -358,6 +376,22 @@ class GraficosMetricas():
                 ],className='two columns margin-Left'),
 
                 html.Div([
+                    html.I(className='far fa-calendar-check', style={'font-size':'36px', 'margin-left': '140%', 'margin-top': '46%'}),
+                ],className='one column'),
+
+                html.Div([
+                    html.Label(['Escolha o período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
+                    dcc.DatePickerRange(
+                        id="dateRangeMetricas",
+                        min_date_allowed='',
+                        max_date_allowed='',
+                        start_date=dataInicial,
+                        end_date=dataFinal,
+                        display_format='DD/MM/YYYY',
+                    ),
+                ],className='three columns fake padding-1P'),
+
+                html.Div([
                     html.I(className='far fa-smile', style={'font-size':'36px', 'margin-left': '170%', 'margin-top': '46%'}),
                 ],className='one column'),
 
@@ -372,26 +406,12 @@ class GraficosMetricas():
                         searchable=True,
                         placeholder='Escolha uma Métrica...',
                         className='form-dropdown',
-                        style={'width':"90%"},
+                        style={'width':"100%"},
                         persistence='string',
                         persistence_type='memory'),
-                ],className='two columns margin-Left'),
+                ],className='two columns fake margin-Left'),
 
-                html.Div([
-                    html.I(className='far fa-calendar-check', style={'font-size':'36px', 'margin-left': '140%', 'margin-top': '46%'}),
-                ],className='one column'),
-
-                html.Div([
-                    html.Label(['Escolha o período:'],style={'font-weight': 'bold', 'text-align': 'left'}),
-                    dcc.DatePickerRange(
-                        id="dateRangeMetricas",
-                        min_date_allowed='',
-                        max_date_allowed='',
-                        start_date=dataInicial,
-                        end_date=dataFinal,
-                        display_format='DD/MM/YYYY',
-                    ),
-                ],className='four columns padding-1P'),
+                
 
             ],className='twelve columns div-fields'),
 
@@ -439,7 +459,6 @@ class GraficosMetricas():
             df_date = df_date.sort_values(by=['data'])
 
             dff = df[(df['idUsuario'] == aluno) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
-            #fig = px.bar(df[mask], x='data', y='polaridade', color='idUsuario')
             
             if len(dff['polaridade']) > 0:
                 cores = []
@@ -449,7 +468,8 @@ class GraficosMetricas():
                     else:
                         cores.append('red')
 
-                dff['cores_polaridade'] = cores
+                #dff['cores_polaridade'] = cores
+                dff.insert(2, 'cores_polaridade', cores, True)
 
                 fig = px.bar(dff, x=dff['data'], y=dff['polaridade'], 
                     color=dff['cores_polaridade'],
@@ -521,6 +541,8 @@ class GraficosMetricas():
                                 corClassificacao = 'orange'
                             elif vetClassificacao[i] == '[ELOGIO]':
                                 corClassificacao = 'green'
+                            elif vetClassificacao[i] == '[PREOCUPAÇÃO]':
+                                corClassificacao = 'purple'
                             else:
                                 corClassificacao = 'black'
 
@@ -567,6 +589,8 @@ class GraficosMetricas():
                                         corClassificacao = 'orange'
                                     elif vetClassificacao[i] == '[ELOGIO]':
                                         corClassificacao = 'green'
+                                    elif vetClassificacao[i] == '[PREOCUPAÇÃO]':
+                                        corClassificacao = 'purple'
                                     else:
                                         corClassificacao = 'black'
 
@@ -676,14 +700,27 @@ class GraficosMetricas():
                         dff_aux_alunos = vet_bool
 
             filtraPelaColuna = nrc_emotion
-            #colorPelaColuna = 'TEM_' + nrc_emotion.upper()
             if filtraPelaColuna != '':
                 df_date = pd.DataFrame()
                 df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
                 df_date = df_date.sort_values(by=['data'])
                 
-                dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
-                dff = dff[dff[filtraPelaColuna].notnull()]
+                if nrc_emotion == None:
+                    dff=df[dff_aux_alunos & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
+                else:
+                    dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
+
+
+                b_mostra_legenda = True
+                if filtraPelaColuna in dff.columns:
+                    dff = dff[dff[filtraPelaColuna].notnull()]
+                else:
+                    dff = pd.DataFrame()
+                    dff['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
+                    dff = dff.sort_values(by=['data'])
+                    dff[filtraPelaColuna] = None
+                    dff['idUsuario'] = None
+                    b_mostra_legenda = False
 
                 fig = px.line(dff, 
                     x='data', 
@@ -692,7 +729,6 @@ class GraficosMetricas():
                     labels=dict(idUsuario="USUÁRIO(S)"),
                     height=600) 
 
-                #fig.update_traces(marker=dict(size=12,line=dict(width=2, color='DarkSlateGrey')), selector=dict(mode='markers'))
                 fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
 
                 fig.update_layout(yaxis={'title':filtraPelaColuna.upper()},
@@ -701,8 +737,11 @@ class GraficosMetricas():
                                 'font':{'size':20},'x':0.5,'xanchor':'center'},
                                 hovermode='x')
 
-                
-                
+                if not b_mostra_legenda:
+                    fig.update_layout({
+                        'showlegend':False,
+                    })
+
                 #Tratamento pro Click do ponto
                 gValorTexto = ''
                 gCabecalhoTexto = ''
@@ -759,6 +798,8 @@ class GraficosMetricas():
                                 corClassificacao = 'orange'
                             elif vetClassificacao[i] == '[ELOGIO]':
                                 corClassificacao = 'green'
+                            elif vetClassificacao[i] == '[PREOCUPAÇÃO]':
+                                corClassificacao = 'purple'
                             else:
                                 corClassificacao = 'black'
 
@@ -805,6 +846,8 @@ class GraficosMetricas():
                                         corClassificacao = 'orange'
                                     elif vetClassificacao[i] == '[ELOGIO]':
                                         corClassificacao = 'green'
+                                    elif vetClassificacao[i] == '[PREOCUPAÇÃO]':
+                                        corClassificacao = 'purple'
                                     else:
                                         corClassificacao = 'black'
 

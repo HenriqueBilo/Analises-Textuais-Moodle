@@ -79,7 +79,9 @@ color: black !important;
   .one.column,
   .one.columns                    { width: 4.66666666667%; }
   .two.columns                    { width: 13.3333333333%; }
+  .two.columns.fake               { width: 14%;            }
   .three.columns                  { width: 22%;            }
+  .three.columns.fake             { width: 18%;            }
   .four.columns                   { width: 30.6666666667%; }
   .five.columns                   { width: 39.3333333333%; }
   .six.columns                    { width: 48%;            }

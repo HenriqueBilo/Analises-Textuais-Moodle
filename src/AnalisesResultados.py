@@ -65,14 +65,27 @@ class AnalisesResultados():
 
             emotion = NRCLex(frase_traduzida.text) #Obter classificação
 
+
+            '''kw_extractor = yake.KeywordExtractor(lan='pt')
+            keywords = kw_extractor.extract_keywords(frase)
+            for kw in keywords:
+                print(kw)
+                # creating objects
+                palavra_traduzida = translator.translate(kw[0], src='pt', dest='en') #Traduz para inglês
+                emotion_kw = NRCLex(palavra_traduzida.text)
+                # Classify emotion
+                print('\n\n', palavra_traduzida, ': ', emotion_kw.top_emotions)'''
+
+
             emocoes_sentenca = ''
             for i in range(len(emotion.top_emotions)): #Percorre todas classificações (umas 10)
                 nome_emocao = emotion.top_emotions[i][0]
                 valor_emocao = emotion.top_emotions[i][1]
-                if i+1 != len(emotion.top_emotions):
-                    emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao) + '*'
-                else:
-                    emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao)
+                if nome_emocao != 'positive' and nome_emocao != 'negative':
+                    if i+1 != len(emotion.top_emotions):
+                        emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao) + '*'
+                    else:
+                        emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao)
             if emocoes_sentenca == '':
                 #return 'None'
                 dict_emocoes_nrc[indice_frase] = 'None'
@@ -95,29 +108,10 @@ class AnalisesResultados():
         #with ThreadPoolExecutor() as executor:
         for i in range(len(retornoMensagens)): #Percorre todas mensagens
             frase = retornoMensagens[i][1].replace('\\', '\\\\')
-            '''if frase is not np.nan:
-                textstat.set_lang('en')
-                translator = Translator()
-                frase_traduzida = translator.translate(frase, src='pt', dest='en') #Traduz para inglês
 
-                emotion = NRCLex(frase_traduzida.text) #Obter classificação
+            #self.teste(frase, i+1, dict_emocoes_nrc)
 
-                emocoes_sentenca = ''
-                for i in range(len(emotion.top_emotions)): #Percorre todas classificações (umas 10)
-                    nome_emocao = emotion.top_emotions[i][0]
-                    valor_emocao = emotion.top_emotions[i][1]
-                    if i+1 != len(emotion.top_emotions):
-                        emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao) + '*'
-                    else:
-                        emocoes_sentenca += str(nome_emocao) + ':' + str(valor_emocao)
-                if emocoes_sentenca == '':
-                    array_emocoes_nrc.append('None')
-                else:
-                    array_emocoes_nrc.append(emocoes_sentenca)
-            else:
-                array_emocoes_nrc.append(np.nan)'''
             pool.submit(self.teste, frase, i+1, dict_emocoes_nrc) #Primeiro parametro é a função e os outros são os parametros pra função
-            #array_emocoes_nrc.append(retorno)
 
         pool.shutdown(wait=True)
 
@@ -141,48 +135,65 @@ class AnalisesResultados():
             emocoes_nrc = retornoMensagens[i][4].split('*') #Nrc emotions (Emocoes:valor*Emocoes:Valor)
             google_perspective = retornoMensagens[i][5].split('*') #Google perspective (Emocoes:valor*Emocoes*valor)
 
-            for nrc in range(len(emocoes_nrc)):
-                nome_emocao_nrc = emocoes_nrc[nrc].split(':')[0]
-                valor_emocao_nrc = emocoes_nrc[nrc].split(':')[1]
+            for google_p in range(len(google_perspective)):
+                nome_emocao_google = google_perspective[google_p].split(':')[0]
+                valor_emocao_google = google_perspective[google_p].split(':')[1]
 
-                for google_p in range(len(google_perspective)):
-                    nome_emocao_google = google_perspective[google_p].split(':')[0]
-                    valor_emocao_google = google_perspective[google_p].split(':')[1]
+                eh_preocupacao = False
+                for nrc in range(len(emocoes_nrc)):
+                    if emocoes_nrc[nrc] != 'None' and emocoes_nrc[nrc] != None and emocoes_nrc[nrc] != '':
+                        nome_emocao_nrc = emocoes_nrc[nrc].split(':')[0]
+                        valor_emocao_nrc = emocoes_nrc[nrc].split(':')[1]
 
-                    eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.2) \
-                                    | (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.2)
-
-                    eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.2) \
-                                  | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.2) \
-                                  | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.2) 
-
-                    eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.2) \
-                                | (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.2)
-
-                    eh_insatisfacao = (nome_emocao_google == 'Desgosto' and float(valor_emocao_google) > 0.2) \
-                                      | (nome_emocao_google == 'Tristeza' and float(valor_emocao_google) > 0.2)
-
-                    if float(polaridade) < 0 and eh_reclamacao:
-                        if 'Reclamação' not in dic_classificacao[i]:
-                            dic_classificacao[i].append('Reclamação')
-                    if float(polaridade) < 0 and eh_agressao:
-                        if 'Agressão' not in dic_classificacao[i]:
-                            dic_classificacao[i].append('Agressão')
-                    if float(polaridade) > 0 and eh_elogio:
-                        if 'Elogio' not in dic_classificacao[i]:
-                            dic_classificacao[i].append('Elogio')
-                    if float(polaridade) < 0 and eh_insatisfacao:
-                        if 'Insatisfação' not in dic_classificacao[i]:
-                            dic_classificacao[i].append('Insatisfação')
-                    '''if not(eh_reclamacao) and not(eh_agressao) and not(eh_elogio) and not(eh_insatisfacao):
-                        dic_classificacao[i].append('None') #Erro aqui...'''
-                    
-
+                        eh_preocupacao = self.classificador_nrc_e_google_perspective(nome_emocao_nrc, valor_emocao_nrc, nome_emocao_google, valor_emocao_google)
                 
+                        if eh_preocupacao:
+                            if 'Preocupação' not in dic_classificacao[i]:
+                                dic_classificacao[i].append('Preocupação')
+
+                eh_reclamacao, eh_agressao, eh_elogio, eh_insatisfacao = self.classificador_google_perspective(nome_emocao_google, valor_emocao_google)
+                        
+                if float(polaridade) < 0 and eh_reclamacao:
+                    if 'Reclamação' not in dic_classificacao[i]:
+                        dic_classificacao[i].append('Reclamação')
+                if float(polaridade) < 0 and eh_agressao:
+                    if 'Agressão' not in dic_classificacao[i]:
+                        dic_classificacao[i].append('Agressão')
+                if float(polaridade) > 0 and eh_elogio:
+                    if 'Elogio' not in dic_classificacao[i]:
+                        dic_classificacao[i].append('Elogio')
+                if float(polaridade) < 0 and eh_insatisfacao:
+                    if 'Insatisfação' not in dic_classificacao[i]:
+                        dic_classificacao[i].append('Insatisfação')
+                     
         #Grava no csv
         funcoes_auxiliares = FuncoesAuxiliares()
         funcoes_auxiliares.adiciona_nova_coluna('./data/dados_metricas.csv', './data/dados_metricas_finais.csv', 'classificacao', dic_classificacao)
-                    
+
+    def classificador_nrc_e_google_perspective(self, nome_emocao_nrc, valor_emocao_nrc, nome_emocao_google, valor_emocao_google):
+        
+        eh_preocupacao = (nome_emocao_nrc == 'anticipation' and float(valor_emocao_nrc) > 0.7) \
+                        | (nome_emocao_nrc == 'fear' and float(valor_emocao_nrc) > 0.7) \
+                        | (nome_emocao_nrc == 'sadness' and float(valor_emocao_nrc) > 0.7)
+
+        return eh_preocupacao
+    
+    def classificador_google_perspective(self, nome_emocao_google, valor_emocao_google):
+        eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.7) \
+                        |   (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.7)
+
+        eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.7) \
+                    | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.7) \
+                    | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.7) 
+
+        eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.7) #\
+                    #| (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.2)
+
+        eh_insatisfacao = (nome_emocao_google == 'Desgosto' and float(valor_emocao_google) > 0.7) \
+                        | (nome_emocao_google == 'Tristeza' and float(valor_emocao_google) > 0.7)
+
+        return eh_reclamacao, eh_agressao, eh_elogio, eh_insatisfacao
+                 
     def analise_metricas(self, retornoMensagens):
         #Analise de Polaridade
         self.analisa_polaridade(retornoMensagens)

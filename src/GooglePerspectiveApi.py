@@ -7,16 +7,41 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import collections
 
+#from random import randint
+
+#Teste
+from googletrans import Translator  # GoogleTrans para tradução
+import yake  # Para pegar palavras mais utilizadas
+import textstat  # Textstat - pip install textstat - para instalar
+
 class GooglePerspectiveApi():
 
-    def teste(self, frase, indice_frase, dict_metricas, lock):
+    def teste(self, frase, indice_frase, dict_metricas):
 
         while True:
             api_key = ''
             url = ('https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=' + api_key)
 
-
             #frase = 'APRESENTAÇÃO MEMBROS DA BANCA PITCH Prezadxs; Para conhecimento de vocês, nós conseguimos a colaboração de um "time de peso" para comporem a banca de vocês. São quatro pessoas, sendo duas delas, as professoras Aurora Zen e Luciana Nedel, bastante envolvidas no ecossistema de empreendedorismo dentro de universidades, com experiência nacional e internacional, atuando em atividades de gestão de incubadores, parques tecnológicos, aproximando o universo acadêmico à sociedade e viceversa. Os outros dois membros, Jaime Wagner e Sérgio Finger, são empresários também com um forte envolvimento com empreendedorismo, com experiência na criação de startups e empresas de diferentes de porte. Segue, para conhecimentos de vocês, uma shortbio dos membros da banca (ordem Alfabética): AURORA ZEN, is associate professor in Innovation Management at the Graduate Program of School of Management at the Federal University of Rio Grande do Sul. She has been a Visiting Professor at the Kedge Business School, France, University of Bologna, Italy, Universidad Nacional Del Sur, UNS, Argentina, and Universidad de Antioquia, Medellin, Colombia. She got a PhD. in Business Management at the Federal University of Rio Grande do Sul. Her thesis presented a comparative study between the internationalization strategy of Brazilian and French wineries. She has published many papers and book chapters about international business, strategy, wine industry, innovation, innovation capability, and science parks. Her research interests include international business, strategy, creative economy, wine industry and innovation. JAIME WAGNER, engenheiro eletrônico, mestre em informática e bacharel em filosofia. Fundou as empresas Digitel, Altus, Presenta, Treinar, PowerSelf, WAPT, Vakinha e a WOW Aceleradora. Dirigiu a Plug In Internet e tem longo histórico de atuação em diversas organizações empresariais na promoção do empreendedorismo e do desenvolvimento tecnológico. Blog: http://jaimewagner.com.br/ LUCIANA NEDEL, professora titular no Instituto de Informática da UFRGS desde 2002 e exerce atividades de ensino e pesquisa nas áreas de realidade virtual, visualização interativa e interação humanocomputador. Recebeu o título de doutora em Ciência da Computação pelo Swiss Federal Institute of Tecnology (EPFL) em Lausanne, Suiça, em 1998. Em sua carreira de pesquisadora, tem estado envolvida em projetos com a indústria, bem como em cooperação com várias Universidades no exterior. A mais de 15 anos desenvolve atividades ligadas ao empreendedorismo, sendo que desde junho de 2017 ocupa o cargo de diretora do CEI incubadora (Centro de Empreendimentos em Informática da UFRGS). Na direção do CEI, tem estado envolvida no suporte à geração de startups nas áreas de TI e negócios de impacto, bem como no processo de certificação CERNE. Recentemente, participou do Programa ELI 2019 (Entrepreneurial Leadership & Innovation), no Babson College, em Boston, EUA. SERGIO FINGER, cursou Engenharia da Computação na UFRGS, é Bacharel em Administração pela UFRGS e, atualmente, faz pósgraduação em gestão empresarial pelo Instituto Federal do RS. Foi um dos idealizadores e é cofundador e CEOP da Trashin, startup que realiza gestão de resíduos desde a coleta até a destinação final, utilizando tecnologia para dar escala, segurança e confiabilidade à destinação e valorização de resíduos. Boa apresentação a todos! Erika, Carissimi e Flávio.'
+            frase = frase.replace(' ', '') #DESCOMENTAR DPS
+
+            #textstat.set_lang('en')
+            #translator = Translator()
+
+
+            '''kw_extractor = yake.KeywordExtractor(lan='pt')
+            keywords = kw_extractor.extract_keywords(frase)
+            frase_nova = ''
+            for kw in keywords:
+                #print(kw)
+                # creating objects
+                #palavra_traduzida = translator.translate(kw[0], src='pt', dest='en') #Traduz para inglês
+                #emotion_kw = NRCLex(palavra_traduzida.text)
+                # Classify emotion
+                #print('\n\n', palavra_traduzida, ': ', emotion_kw.top_emotions)
+                frase_nova += kw[0] + ' ' '''
+
+
 
             if frase is not np.nan:
                 data_dict = {
@@ -27,12 +52,6 @@ class GooglePerspectiveApi():
 
                 try:
                     response = post(url=url, data=json.dumps(data_dict))
-                    #contador = 1
-                    '''while response.status_code != 200:
-                        time.sleep(1)
-                        response = post(url=url, data=json.dumps(data_dict))
-                        contador += 1
-                        #print('Entrou no retry')'''
 
                     response_dict = json.loads(response.content)
 
@@ -42,6 +61,20 @@ class GooglePerspectiveApi():
                     valor_ameaca = response_dict['attributeScores']['THREAT']['summaryScore']['value']
                     valor_toxidade = response_dict['attributeScores']['TOXICITY']['summaryScore']['value']
                     valor_insulto = response_dict['attributeScores']['INSULT']['summaryScore']['value']
+
+                    #ameaça e insulto, ataque identitário e toxicidade
+                    if valor_ameaca > valor_insulto:
+                        valor_ameaca = (valor_ameaca + valor_insulto) / 2
+                    if valor_insulto > valor_ameaca:
+                        valor_insulto = (valor_ameaca + valor_insulto) / 2
+                    
+                    #valor_insulto = (valor_ameaca + valor_insulto) / 2
+                    if valor_ataque_identidade > valor_toxidade:
+                        valor_ataque_identidade = (valor_ataque_identidade + valor_toxidade) / 2
+                    if valor_toxidade > valor_ataque_identidade:
+                        valor_toxidade = (valor_ataque_identidade + valor_toxidade) / 2
+                    #valor_toxidade = (valor_ataque_identidade + valor_toxidade) / 2
+
 
                     valores_concatenados = 'Profanidade:' + str(valor_profanidade) + '*' + \
                                         'Toxidade Grave:' + str(valor_toxidade_grave) + '*' + \
@@ -58,16 +91,6 @@ class GooglePerspectiveApi():
                     
                 except:
                     time.sleep(1)
-                    '''valores_concatenados =  'Profanidade:' + str(0) + '*' + \
-                                            'Toxidade Grave:' + str(0) + '*' + \
-                                            'Ataque de Identidade:' + str(0) + '*' + \
-                                            'Ameaça:' + str(0) + '*' + \
-                                            'Toxidade:' + str(0) + '*' + \
-                                            'Insulto:' + str(0) 
-                    with lock:
-                        array_metricas.append(valores_concatenados)'''
-                    #print('Caiu na excecao mesmo assim')
-                    #pass
                     continue
             else:
                 valores_concatenados = 'Profanidade:' + str(0) + '*' + \
@@ -84,22 +107,17 @@ class GooglePerspectiveApi():
                 
 
     def chama_api_google_perspective(self, retornoMensagens):
-        array_metricas = []
         dict_metricas = {}
 
         pool = ThreadPoolExecutor()
 
-        lock = Lock()
-
         #with ThreadPoolExecutor() as executor:
         for i in range(len(retornoMensagens)):#
             frase = retornoMensagens[i][1].replace('\\', '\\\\')
-            #r'Prezados alunos,  Espero que estejam todos bem. Gostaríamos de avisar que estão disponíveis no Moodle da disciplina as notas e conceitos de  Cálculo Lambda e Teoria dos Tipos (Graduação)  Foundations for Rigorous Software Development (Pósgraduação)  Gostaríamos de pedir desculpas pela grande demora na correção da Lista 4 e entrega dos conceitos finais da disciplina. O reinício das atividades no formato ERE, em particular a gravação de videoaulas para demais disciplinas acabou contribuindo para esse atraso.  Sobre a recuperação de conceito: vamos solicitar que quem queira incrementar a sua nota/conceito, que nos envie até o final do semestre versões revisadas das listas enviadas previamente, contendo correções, até o último encontro da disciplina (na próxima semana).  Sobre a finalização das atividades, e correção das listas: gostaríamos de marcar um último encontro de despedida da disciplina:  ENCONTRO SÍNCRONO FINAL Data: próxima quintafeira, 26/Novembro Horário: 13:3015:30 Local: Mconf, link disponível no Moodle  A ideia é revisar as Listas de Exercícios, discutir o conteúdo do semestre como um todo e receber feedback de vocês sobre as melhorias que a disciplina pode ter para os próximos semestres.  Bom final de semestre a todos! Rodrigo e Alvaro' 
-            #
-            pool.submit(self.teste, frase, i+1, dict_metricas, lock) #Primeiro parametro é a função e os outros são os parametros pra função
-            #time.sleep(2)
-            #array_metricas.append(retorno.result())
-
+            
+            #self.teste(frase, i+1, dict_metricas)
+            pool.submit(self.teste, frase, i+1, dict_metricas) #Primeiro parametro é a função e os outros são os parametros pra função
+            
         pool.shutdown(wait=True)
 
         dict_emocoes_nrc_ordenado = collections.OrderedDict(sorted(dict_metricas.items()))
