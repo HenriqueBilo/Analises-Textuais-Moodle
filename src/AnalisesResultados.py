@@ -204,25 +204,25 @@ class AnalisesResultados():
         #Atualiza a variavel contendo as mensagens
         retorno_mensagens = pd.read_csv('./data/dados_mensagens_aux_polaridade.csv', sep='-')
         
-        start_nrc = timeit.default_timer()
+        #start_nrc = timeit.default_timer()
 
         #Analisa emoções utilizando NRCLex
         self.analisa_nrc_lex(retorno_mensagens.loc[:].values)
 
-        end_nrc = timeit.default_timer()
+        #end_nrc = timeit.default_timer()
 
-        print('Tempo NRC: ' + str(end_nrc-start_nrc))
+        #print('Tempo NRC: ' + str(end_nrc-start_nrc))
 
         retorno_mensagens = pd.read_csv('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', sep='-')
 
-        start_google = timeit.default_timer()
+        #start_google = timeit.default_timer()
 
         # Analisa Google Perspective API
         self.chamada_google_perspectiveApi(retorno_mensagens.loc[:].values)
 
-        end_google = timeit.default_timer()
+        #end_google = timeit.default_timer()
 
-        print('Tempo GOOGLE: ' + str(end_google-start_google))
+        #print('Tempo GOOGLE: ' + str(end_google-start_google))
 
         # Classifica as mensagens
 
