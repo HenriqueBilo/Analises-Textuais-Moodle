@@ -179,12 +179,12 @@ class AnalisesResultados():
         return eh_preocupacao
     
     def classificador_google_perspective(self, nome_emocao_google, valor_emocao_google):
-        eh_reclamacao = (nome_emocao_google == 'Toxidade' and float(valor_emocao_google) > 0.7) \
+        eh_reclamacao = (nome_emocao_google == 'Media_A_T' and float(valor_emocao_google) > 0.7) \
                         |   (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.7)
 
         eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.7) \
-                    | (nome_emocao_google == 'Ataque De Identidade' and float(valor_emocao_google) > 0.7) \
-                    | (nome_emocao_google == 'Ameaça' and float(valor_emocao_google) > 0.7) 
+                    | (nome_emocao_google == 'Media_A_T' and float(valor_emocao_google) > 0.7) \
+                    | (nome_emocao_google == 'Media_A_I' and float(valor_emocao_google) > 0.7) 
 
         eh_elogio = (nome_emocao_google == 'Alegria' and float(valor_emocao_google) > 0.7) #\
                     #| (nome_emocao_nrc == 'positive' and float(valor_emocao_nrc) > 0.2)

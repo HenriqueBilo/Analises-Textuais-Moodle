@@ -232,6 +232,11 @@ class GraficosMetricas():
                 df.at[i,'TEM_ATAQUE_DE_IDENTIDADE'] = 'ATAQUE_DE_IDENTIDADE'
             if linha.INSULTO != '0':
                 df.at[i,'TEM_INSULTO'] = 'INSULTO'
+            if linha.MEDIA_A_I != '0':
+                df.at[i,'TEM_MEDIA_A_I'] = 'MEDIA_A_I'
+            if linha.MEDIA_A_T != '0':
+                df.at[i,'TEM_MEDIA_A_T'] = 'MEDIA_A_T'
+
 
         #Cria dataFrame para o combo de emoções
         df_combos = pd.DataFrame()
