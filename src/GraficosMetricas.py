@@ -102,6 +102,143 @@ class GraficosMetricas():
 
         return dicionario_retorno
 
+    def prepara_df_grafico_relatorio_geral(self, array_alunos_adicionados, aluno, df, data, df_relatorio_geral):
+        array_aluno = []
+        array_polaridade = []
+
+        array_profanidade = []
+        array_toxidade_grave = []
+        array_ataque_de_identidade = []
+        array_ameaca = []
+        array_toxidade = []
+        array_insulto = []
+
+        array_ansiedade = []
+        array_confiança = []
+        array_medo = []
+        array_raiva = []
+        array_tristeza = []
+        array_surpresa = []
+        array_nojo = []
+        array_alegria = []
+
+        array_a_i = []
+        array_a_t = []
+        
+        array_alunos_adicionados.append(aluno)
+
+        df_aux = df[df['idUsuario'] == aluno]
+        media_polaridade_aluno = df_aux['polaridade'].mean()
+
+        media_profanidade = df_aux['PROFANIDADE'].mean()
+        media_toxidade_grave = df_aux['TOXIDADE_GRAVE'].mean()
+        media_ataque_de_identidade = df_aux['ATAQUE_DE_IDENTIDADE'].mean()
+        media_ameaca = df_aux['AMEAÇA'].mean()
+        media_toxidade =df_aux['TOXIDADE'].mean()
+        media_insulto = df_aux['INSULTO'].mean()
+        media_a_i = df_aux['MEDIA_A_I'].mean()
+        media_a_t = df_aux['MEDIA_A_T'].mean()
+
+        if hasattr(df_aux, 'ANSIEDADE'):
+            media_ansiedade = df_aux['ANSIEDADE'].mean()
+            array_ansiedade.append(media_ansiedade)
+            data['ansiedade'] = array_ansiedade
+            df_relatorio_geral['ansiedade'] = data['ansiedade']
+        else:
+            df_relatorio_geral['ansiedade'] = 0
+        if hasattr(df_aux, 'CONFIANÇA'):
+            media_confiança = df_aux['CONFIANÇA'].mean()
+            array_confiança.append(media_confiança)
+            data['confiança'] = array_confiança
+            df_relatorio_geral['confiança'] = data['confiança']
+        else:
+            df_relatorio_geral['confiança'] = 0
+        if hasattr(df_aux, 'MEDO'):
+            media_medo = df_aux['MEDO'].mean()
+            array_medo.append(media_medo)
+            data['medo'] = array_medo
+            df_relatorio_geral['medo'] = data['medo']
+        else:
+            df_relatorio_geral['medo'] = 0
+        if hasattr(df_aux, 'RAIVA'):
+            media_raiva = df_aux['RAIVA'].mean()
+            array_raiva.append(media_raiva)
+            data['raiva'] = array_raiva
+            df_relatorio_geral['raiva'] = data['raiva']
+        else:
+            df_relatorio_geral['raiva'] = 0
+        if hasattr(df_aux, 'SURPRESA'):
+            media_surpresa = df_aux['SURPRESA'].mean()
+            array_surpresa.append(media_surpresa)
+            data['surpresa'] = array_surpresa
+            df_relatorio_geral['surpresa'] = data['surpresa']
+        else:
+            df_relatorio_geral['surpresa'] = 0
+        if hasattr(df_aux, 'TRISTEZA'):
+            media_tristeza = df_aux['TRISTEZA'].mean()
+            array_tristeza.append(media_tristeza)
+            data['tristeza'] = array_tristeza
+            df_relatorio_geral['tristeza'] = data['tristeza']
+        else:
+            df_relatorio_geral['tristeza'] = 0
+        if hasattr(df_aux, 'NOJO'):
+            media_nojo = df_aux['NOJO'].mean()
+            array_nojo.append(media_nojo)
+            data['nojo'] = array_nojo
+            df_relatorio_geral['nojo'] = data['nojo']
+        else:
+            df_relatorio_geral['nojo'] = 0
+        if hasattr(df_aux, 'ALEGRIA'):
+            media_alegria = df_aux['ALEGRIA'].mean()
+            array_alegria.append(media_alegria)
+            data['alegria'] = array_alegria
+            df_relatorio_geral['alegria'] = data['alegria']
+        else:
+            df_relatorio_geral['alegria'] = 0
+        
+        array_aluno.append(aluno)
+        array_polaridade.append(media_polaridade_aluno)
+
+        array_profanidade.append(media_profanidade)
+        array_toxidade_grave.append(media_toxidade_grave)
+        array_ataque_de_identidade.append(media_ataque_de_identidade)
+        array_ameaca.append(media_ameaca)
+        array_toxidade.append(media_toxidade)
+        array_insulto.append(media_insulto)
+
+        array_a_i.append(media_a_i)
+        array_a_t.append(media_a_t)
+
+        data['idUsuario'] = array_aluno
+        data['media_polaridade'] = array_polaridade
+
+        data['profanidade'] = array_profanidade
+        data['toxidade_grave'] = array_toxidade_grave
+        data['ataque_de_identidade'] = array_ataque_de_identidade
+        data['ameaca'] = array_ameaca
+        data['toxidade'] = array_toxidade
+        data['insulto'] = array_insulto
+
+        data['valor_a_i'] = array_a_i
+        data['valor_a_t'] = array_a_t
+
+        #data = {'idUsuario': array_alunos_adicionados, 'media_polaridade': array_polaridade}
+
+        df_relatorio_geral['idUsuario'] = data['idUsuario']
+        df_relatorio_geral['polaridade'] = data['media_polaridade']
+
+        df_relatorio_geral['profanidade'] = data['profanidade']
+        df_relatorio_geral['toxidade_grave'] = data['toxidade_grave']
+        df_relatorio_geral['ataque_de_identidade'] = data['ataque_de_identidade']
+        df_relatorio_geral['ameaça'] = data['ameaca']
+        df_relatorio_geral['toxidade'] = data['toxidade']
+        df_relatorio_geral['insulto'] = data['insulto']
+
+        df_relatorio_geral['valor_a_i'] = data['valor_a_i']
+        df_relatorio_geral['valor_a_t'] = data['valor_a_t']
+
+        return array_alunos_adicionados, df_relatorio_geral
+
     def cria_grafico_metricas(self):
 
         #Prepara os dados
@@ -237,12 +374,8 @@ class GraficosMetricas():
             if linha.MEDIA_A_T != '0':
                 df.at[i,'TEM_MEDIA_A_T'] = 'MEDIA_A_T'
 
-
         #Cria dataFrame para o combo de emoções
         df_combos = pd.DataFrame()
-
-
-        #Teste
 
         array_nome_nrc_emocoes.append('RAIVA')
         array_nome_nrc_emocoes.append('ANSIEDADE')
@@ -253,8 +386,6 @@ class GraficosMetricas():
         array_nome_nrc_emocoes.append('SURPRESA')
         array_nome_nrc_emocoes.append('CONFIANÇA')
 
-        #Teste
-
         for i in range(len(array_nome_nrc_emocoes)):
             if array_nome_nrc_emocoes[i] not in array_nome_google_emocoes:
                 if array_nome_nrc_emocoes[i] != 'None':
@@ -262,8 +393,6 @@ class GraficosMetricas():
 
         data = {'EMOCOES_COMBO': array_nome_google_emocoes}
         df_combos['EMOCOES_COMBO'] = data['EMOCOES_COMBO']
-
-        #print(df[:])
 
         #Para utilizar no filtro de data
         if len(df['data']) > 0:
@@ -275,6 +404,19 @@ class GraficosMetricas():
         else:
             dataInicial = ''
             dataFinal = ''
+
+        #Prepara os dados para serem utilizados no gráfico de relatório geral
+
+        df_relatorio_geral = pd.DataFrame()
+        array_alunos_adicionados = []
+        for index, aluno in enumerate(df['idUsuario']):
+            if index == 0:
+                array_alunos_adicionados, df_relatorio_geral = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df, data, df_relatorio_geral)
+            else:
+                if aluno not in array_alunos_adicionados:
+                    array_alunos_adicionados, df_relatorio_geral = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df, data, df_relatorio_geral)
+
+
 
         app = dash.Dash(
             __name__,external_stylesheets=['https://use.fontawesome.com/releases/v5.7.2/css/all.css'],
@@ -438,9 +580,26 @@ class GraficosMetricas():
                     id='alertaSemMensagens',
                     message='Não há mensagens para o curso selecionado.',
                 ),
-            ])
+            ]),
 
             #Fim segundo gráfico
+
+            #Terceiro Gráfico
+
+            html.Div([
+                html.Br(),
+                dcc.Graph(id='grafico_relatorio_geral')
+            ],className='eight columns'),
+
+            html.Div([
+                html.Label(['Mensagem selecionada:'],style={'font-weight': 'bold', 'text-align': 'center'}),
+                html.Div(
+                    id='divGraficoGeralFakeTextArea', 
+                    style={'width': '95%', 'height': '470px', 'min-width': '120px', 'min-height': '90px', 'max-width': '400px', 'max-height': '470px', 'padding': '1px', 'border': '1px solid rgb(169, 169, 169)', 'overflow-y': 'auto', 'resize': 'both', 'background-color': 'rgb(235, 235, 228)' }
+                ),
+            ],className='three columns margin-Top'),
+
+            #Fim Terceiro Gráfico
         
         ])
 
@@ -734,7 +893,7 @@ class GraficosMetricas():
                     labels=dict(idUsuario="USUÁRIO(S)"),
                     height=600) 
 
-                fig.update_traces(mode='markers+lines', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
+                fig.update_traces(mode='markers', opacity=1.0, marker=dict(size=12)) #textposition="bottom right" Pra caso use a tag text na line
 
                 fig.update_layout(yaxis={'title':filtraPelaColuna.upper()},
                                 xaxis={'title':'DATA'},
@@ -920,6 +1079,44 @@ class GraficosMetricas():
                 return fig, False, new_div.children
             else:
                 return '', True, '' 
+
+        @app.callback(
+            [
+                Output('grafico_relatorio_geral','figure'),
+                Output('divGraficoGeralFakeTextArea', 'children'),
+            ],
+            [
+                Input('grafico_relatorio_geral', 'clickData'),
+                State('divMetricasFakeTextArea', 'children')
+            ]
+        )
+
+        def atualiza_grafico_relatorio_geral(clickData, children):
+            fig = px.parallel_coordinates(df_relatorio_geral,
+                color='idUsuario',
+                dimensions= ['polaridade', 'ansiedade', 'confiança', 'medo', 'raiva', 'surpresa', 'tristeza', 'nojo', 'alegria',
+                            'profanidade', 'toxidade_grave', 'ataque_de_identidade', 'ameaça', 'toxidade', 'insulto', 
+                            'valor_a_i', 'valor_a_t'], #array com todas metricas
+                color_continuous_scale=px.colors.diverging.Tealrose,
+                color_continuous_midpoint=2,
+                
+
+            )
+
+            '''
+            
+            labels=dict(idUsuario='TESTE'),
+            height=600
+            '''
+
+            '''fig.update_layout(#yaxis={'title':filtraPelaColuna.upper()},
+                                #xaxis={'title':'DATA'},
+                                title={'text':'Relatório Geral da Turma',
+                                'font':{'size':20},'x':0.5,'xanchor':'center'},
+                                hovermode='x')'''
+
+            return fig, children
+
 
         webbrowser.open('http://127.0.0.1:8050')
         app.run_server(debug=False)

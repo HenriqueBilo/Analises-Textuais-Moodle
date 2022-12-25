@@ -8,8 +8,8 @@ import pandas as pd
 import numpy as np
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-import timeit
 import collections
+import timeit
 
 from src.FuncoesAuxiliares import *
 from src.GooglePerspectiveApi import *
@@ -57,7 +57,7 @@ class AnalisesResultados():
         print('Facilidade de leitura da frase "', test_data.text, '": ', teste)
     '''
 
-    def teste(self, frase, indice_frase, dict_emocoes_nrc):
+    def teste(self, frase, indice_frase, dict_emocoes_nrc, lock):
         if frase is not np.nan:
             textstat.set_lang('en')
             translator = Translator()
@@ -93,17 +93,33 @@ class AnalisesResultados():
                 #return emocoes_sentenca
                 dict_emocoes_nrc[indice_frase] = emocoes_sentenca
                 #array_emocoes_nrc.append(emocoes_sentenca)
+
+            #with lock:
+            self.contador_global += 1
+            #lock.release()
+
+            self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensagens, 'Realizando a análise')
         else:
             #return np.nan
             dict_emocoes_nrc[frase] = np.nan
+
+            #with lock:
+            self.contador_global += 1
+            #lock.release()
+
+            self.funcoes_auxiliares.barra_progresso(self.contador_global + 1, self.tamanho_mensagens, 'Realizando a análise')
             #array_emocoes_nrc.append(np.nan)
 
     def analisa_nrc_lex(self, retornoMensagens):
         # TESTE API - NRCLex (emoções) e Yake (pega palavras mais usadas)
 
         dict_emocoes_nrc = {}
+        self.contador_global = 0
+        self.funcoes_auxiliares = FuncoesAuxiliares()
+        self.tamanho_mensagens = len(retornoMensagens)
 
         pool = ThreadPoolExecutor()
+        lock = Lock()
 
         #with ThreadPoolExecutor() as executor:
         for i in range(len(retornoMensagens)): #Percorre todas mensagens
@@ -111,14 +127,14 @@ class AnalisesResultados():
 
             #self.teste(frase, i+1, dict_emocoes_nrc)
 
-            pool.submit(self.teste, frase, i+1, dict_emocoes_nrc) #Primeiro parametro é a função e os outros são os parametros pra função
+            pool.submit(self.teste, frase, i+1, dict_emocoes_nrc, lock) #Primeiro parametro é a função e os outros são os parametros pra função
+            #time.sleep(0.1)
 
         pool.shutdown(wait=True)
+        print()
 
         dict_emocoes_nrc_ordenado = collections.OrderedDict(sorted(dict_emocoes_nrc.items()))
-
-        funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', 'NRC_EMOTIONS', dict_emocoes_nrc_ordenado)
+        self.funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade.csv', './data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', 'NRC_EMOTIONS', dict_emocoes_nrc_ordenado)
 
     def chamada_google_perspectiveApi(self, retornoMensagens):
         chamada_google_perspective_api = GooglePerspectiveApi()
@@ -127,6 +143,7 @@ class AnalisesResultados():
     def classifica_mensagens(self, retornoMensagens):
 
         dic_classificacao = defaultdict(list)
+        funcoes_auxiliares = FuncoesAuxiliares()
 
         #Obs a mensagem[i] pode ter mais de 1 classificação
 
@@ -165,9 +182,11 @@ class AnalisesResultados():
                 if float(polaridade) < 0 and eh_insatisfacao:
                     if 'Insatisfação' not in dic_classificacao[i]:
                         dic_classificacao[i].append('Insatisfação')
-                     
+
+            funcoes_auxiliares.barra_progresso(i + 1, len(retornoMensagens), 'Classificando as mensagens')
+
+        print()          
         #Grava no csv
-        funcoes_auxiliares = FuncoesAuxiliares()
         funcoes_auxiliares.adiciona_nova_coluna('./data/dados_metricas.csv', './data/dados_metricas_finais.csv', 'classificacao', dic_classificacao)
 
     def classificador_nrc_e_google_perspective(self, nome_emocao_nrc, valor_emocao_nrc, nome_emocao_google, valor_emocao_google):

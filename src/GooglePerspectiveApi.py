@@ -15,8 +15,7 @@ import yake  # Para pegar palavras mais utilizadas
 import textstat  # Textstat - pip install textstat - para instalar
 
 class GooglePerspectiveApi():
-
-    def teste(self, frase, indice_frase, dict_metricas):
+    def teste(self, frase, indice_frase, dict_metricas, lock):
 
         while True:
             api_key = ''
@@ -59,8 +58,11 @@ class GooglePerspectiveApi():
                     #return valores_concatenados
                     #with lock:
                     dict_metricas[indice_frase] = valores_concatenados
-                    break
+                    self.contador_global += 1
+                    self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Complementando a análise')
                     #lock.release()
+                    break
+                    
                     
                 except:
                     time.sleep(1)
@@ -77,25 +79,29 @@ class GooglePerspectiveApi():
                 #return valores_concatenados
                 #with lock:
                 dict_metricas[indice_frase] = valores_concatenados
-                break
+                self.contador_global += 1
+                self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Complementando a análise')
                 #lock.release()
+                break
                 
-
     def chama_api_google_perspective(self, retornoMensagens):
         dict_metricas = {}
+        self.funcoes_auxiliares = FuncoesAuxiliares()
+        self.contador_global = 0
 
         pool = ThreadPoolExecutor()
+        lock = Lock()
 
-        #with ThreadPoolExecutor() as executor:
+        self.tamanho_mensanges = len(retornoMensagens)
+
         for i in range(len(retornoMensagens)):#
             frase = retornoMensagens[i][1].replace('\\', '\\\\')
             
-            #self.teste(frase, i+1, dict_metricas)
-            pool.submit(self.teste, frase, i+1, dict_metricas) #Primeiro parametro é a função e os outros são os parametros pra função
+            pool.submit(self.teste, frase, i+1, dict_metricas, lock) #Primeiro parametro é a função e os outros são os parametros pra função
+
             
         pool.shutdown(wait=True)
+        print()
 
         dict_emocoes_nrc_ordenado = collections.OrderedDict(sorted(dict_metricas.items()))
-
-        funcoes_auxiliares = FuncoesAuxiliares()
-        funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', './data/dados_metricas.csv', 'GooglePerspectiveMetrics', dict_emocoes_nrc_ordenado)
+        self.funcoes_auxiliares.adiciona_nova_coluna_dict('./data/dados_mensagens_aux_polaridade_e_nrc_emotions.csv', './data/dados_metricas.csv', 'GooglePerspectiveMetrics', dict_emocoes_nrc_ordenado)

@@ -8,6 +8,8 @@ from src.Postagens import *
 from src.MoodleApi import *
 
 import os
+import pwinput
+import math
 
 class FuncoesAuxiliares():
 
@@ -17,7 +19,7 @@ class FuncoesAuxiliares():
     def pega_informacoes_usuario(self):
         while True:
             usuario = input('Informe seu usuário (matrícula UFRGS): ')
-            senha = input('Informe sua senha: ')
+            senha = pwinput.pwinput('Informe sua senha: ')
 
             usuario = usuario.zfill(8)
 
@@ -157,3 +159,8 @@ class FuncoesAuxiliares():
         for arquivo in array_arquivos_deletar:
             if os.path.isfile(arquivo):
                 os.remove(arquivo)
+
+    def barra_progresso(self, progresso, total, prefixo, sufixo = 'Completo'):
+        percentual = 100 * (progresso / float(total))
+        barra = '█' * int(percentual) + '-' * (100 - int(percentual))
+        print(f'\r{prefixo} |{barra}| {percentual:.2f}% {sufixo}', end='\r')
