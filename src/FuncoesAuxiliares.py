@@ -162,4 +162,4 @@ class FuncoesAuxiliares():
     def barra_progresso(self, progresso, total, prefixo, sufixo = 'Completo'):
         percentual = 100 * (progresso / float(total))
         barra = '█' * int(percentual) + '-' * (100 - int(percentual))
-        print(f'\r{prefixo} |{barra}| {percentual:.2f}% {sufixo}', end='\r')
+        print(f'\r{prefixo} |{barra}| {percentual:.2f}% {sufixo}', end='\r', flush = True)

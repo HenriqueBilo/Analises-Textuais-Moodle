@@ -94,21 +94,20 @@ class AnalisesResultados():
                 dict_emocoes_nrc[indice_frase] = emocoes_sentenca
                 #array_emocoes_nrc.append(emocoes_sentenca)
 
-            #with lock:
+            lock.acquire()
             self.contador_global += 1
-            #lock.release()
-
             self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensagens, 'Realizando a análise')
+            lock.release()
+
         else:
             #return np.nan
             dict_emocoes_nrc[frase] = np.nan
 
-            #with lock:
+            lock.acquire()
             self.contador_global += 1
-            #lock.release()
-
             self.funcoes_auxiliares.barra_progresso(self.contador_global + 1, self.tamanho_mensagens, 'Realizando a análise')
-            #array_emocoes_nrc.append(np.nan)
+            lock.release()
+            
 
     def analisa_nrc_lex(self, retornoMensagens):
         # TESTE API - NRCLex (emoções) e Yake (pega palavras mais usadas)

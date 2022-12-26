@@ -14,11 +14,15 @@ from src.AnalisesResultados import *
 from src.GraficosMetricas import *
 
 #import timeit
+import win32gui, win32con
 
 if __name__ == '__main__':
 
     if not os.path.isdir('./data'):
         os.makedirs('./data')
+
+    hwnd = win32gui.GetForegroundWindow()
+    win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
 
     #id_disciplina_escolhida = ''
     #while id_disciplina_escolhida != 0:
