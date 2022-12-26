@@ -14,6 +14,7 @@ from src.AnalisesResultados import *
 from src.GraficosMetricas import *
 
 import timeit
+import plotly.express as px
 
 if __name__ == '__main__':
 
