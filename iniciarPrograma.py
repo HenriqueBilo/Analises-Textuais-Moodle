@@ -13,10 +13,12 @@ from src.FuncoesAuxiliares import *
 from src.AnalisesResultados import *
 from src.GraficosMetricas import *
 
-import timeit
-import plotly.express as px
+#import timeit
 
 if __name__ == '__main__':
+
+    if not os.path.isdir('./data'):
+        os.makedirs('./data')
 
     #id_disciplina_escolhida = ''
     #while id_disciplina_escolhida != 0:

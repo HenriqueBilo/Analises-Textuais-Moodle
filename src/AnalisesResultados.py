@@ -9,7 +9,7 @@ import numpy as np
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 import collections
-import timeit
+#import timeit
 
 from src.FuncoesAuxiliares import *
 from src.GooglePerspectiveApi import *

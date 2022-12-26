@@ -9,7 +9,6 @@ from src.MoodleApi import *
 
 import os
 import pwinput
-import math
 
 class FuncoesAuxiliares():
 
