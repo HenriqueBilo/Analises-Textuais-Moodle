@@ -37,7 +37,6 @@ if __name__ == '__main__':
 
     if id_disciplina_escolhida == '0':
         exit()
-        #break
 
     print('\n ------ Processando... Aguarde um momento ------')
 
@@ -71,7 +70,7 @@ if __name__ == '__main__':
     #print('TESTEEEEEE: ' + str(end-start))
 
     graficos_resultados = GraficosMetricas()
-    graficos_resultados.cria_grafico_metricas()
+    graficos_resultados.prepara_dados_gerais_graficos()
 
     funcoes_auxiliares = FuncoesAuxiliares()
     funcoes_auxiliares.deleta_arquivos_auxiliares()

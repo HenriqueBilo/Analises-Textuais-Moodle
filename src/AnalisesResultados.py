@@ -198,7 +198,7 @@ class AnalisesResultados():
     
     def classificador_google_perspective(self, nome_emocao_google, valor_emocao_google):
         eh_reclamacao = (nome_emocao_google == 'Media_A_T' and float(valor_emocao_google) > 0.7) \
-                        |   (nome_emocao_google == 'Toxidade Grave' and float(valor_emocao_google) > 0.7)
+                        |   (nome_emocao_google == 'Toxicidade Grave' and float(valor_emocao_google) > 0.7)
 
         eh_agressao = (nome_emocao_google == 'Raiva' and float(valor_emocao_google) > 0.7) \
                     | (nome_emocao_google == 'Media_A_T' and float(valor_emocao_google) > 0.7) \
