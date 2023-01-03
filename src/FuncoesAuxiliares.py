@@ -159,7 +159,7 @@ class FuncoesAuxiliares():
             if os.path.isfile(arquivo):
                 os.remove(arquivo)
 
-    def barra_progresso(self, progresso, total, prefixo, sufixo = 'Completo'):
+    def barra_progresso(self, progresso, total, prefixo, sufixo = ''):
         percentual = 100 * (progresso / float(total))
         barra = '█' * int(percentual) + '-' * (100 - int(percentual))
-        print(f'\r{prefixo} |{barra}| {percentual:.2f}% {sufixo}', end='\r', flush = True)
+        print(f'\r{prefixo} |{barra}| {int(percentual)}%', end='\r', flush = True)

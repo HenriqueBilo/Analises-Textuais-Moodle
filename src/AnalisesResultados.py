@@ -96,7 +96,7 @@ class AnalisesResultados():
 
             lock.acquire()
             self.contador_global += 1
-            self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensagens, 'Realizando a análise')
+            self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensagens, 'Analisando')
             lock.release()
 
         else:
@@ -105,7 +105,7 @@ class AnalisesResultados():
 
             lock.acquire()
             self.contador_global += 1
-            self.funcoes_auxiliares.barra_progresso(self.contador_global + 1, self.tamanho_mensagens, 'Realizando a análise')
+            self.funcoes_auxiliares.barra_progresso(self.contador_global + 1, self.tamanho_mensagens, 'Analisando')
             lock.release()
             
 
@@ -182,7 +182,7 @@ class AnalisesResultados():
                     if 'Insatisfação' not in dic_classificacao[i]:
                         dic_classificacao[i].append('Insatisfação')
 
-            funcoes_auxiliares.barra_progresso(i + 1, len(retornoMensagens), 'Classificando as mensagens')
+            funcoes_auxiliares.barra_progresso(i + 1, len(retornoMensagens), 'Finalizando')
 
         print()          
         #Grava no csv

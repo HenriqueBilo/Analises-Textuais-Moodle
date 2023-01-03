@@ -14,63 +14,79 @@ from src.AnalisesResultados import *
 from src.GraficosMetricas import *
 
 #import timeit
-import win32gui, win32con
+#import win32gui, win32con
+import os
 
 if __name__ == '__main__':
-
     if not os.path.isdir('./data'):
         os.makedirs('./data')
 
-    hwnd = win32gui.GetForegroundWindow()
-    win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
+    #file_path = os.getcwd() + '\iniciarPrograma.exe'
+    #file_path = file_path.replace('py', 'exe')
+    #hwnd = win32gui.FindWindow(None, file_path)
+    
+    #print('Teste: ' + file_path)
+    '''hwnd = win32gui.GetForegroundWindow()
+    print(hwnd)
+    if hwnd != 0:
+        win32gui.SetForegroundWindow(hwnd)
+        win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)'''
+        #win32gui.ShowWindow(hwnd, win32con.SW_SHOWNORMAL)
+        
 
-    #id_disciplina_escolhida = ''
-    #while id_disciplina_escolhida != 0:
+    id_disciplina_escolhida = ''
 
-    funcoes_auxiliares = FuncoesAuxiliares()
+    port = 8050
 
-    # Pega informações do usuário
-    lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
+    while id_disciplina_escolhida != 0:
+        funcoes_auxiliares = FuncoesAuxiliares()
 
-    # Seleciona o curso
-    id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
+        # Pega informações do usuário
+        lista_cursos_usuario, id_usuario_buscado = funcoes_auxiliares.pega_informacoes_usuario()
 
-    if id_disciplina_escolhida == '0':
-        exit()
+        # Seleciona o curso
+        id_disciplina_escolhida = funcoes_auxiliares.menu_selecao_curso(lista_cursos_usuario)
 
-    print('\n ------ Processando... Aguarde um momento ------')
+        if id_disciplina_escolhida == '0':
+            #exit()
+            break
 
-    # Pega as mensagens dos chats do curso
-    cursos_array = funcoes_auxiliares.coleta_mensagens_chat_do_curso(id_disciplina_escolhida)
+        print('\n ------ Processando... Aguarde um momento ------')
 
-    # Pega as direct messages
-    funcoes_auxiliares.coleta_mensagens_diretas_ao_professor(cursos_array, id_usuario_buscado)
+        # Pega as mensagens dos chats do curso
+        cursos_array = funcoes_auxiliares.coleta_mensagens_chat_do_curso(id_disciplina_escolhida)
 
-    # Pega as mensagens dos fóruns
-    funcoes_auxiliares.coleta_mensagens_dos_foruns(cursos_array)
+        # Pega as direct messages
+        funcoes_auxiliares.coleta_mensagens_diretas_ao_professor(cursos_array, id_usuario_buscado)
 
-    leitura_arquivos = LeituraCsvs()
+        # Pega as mensagens dos fóruns
+        funcoes_auxiliares.coleta_mensagens_dos_foruns(cursos_array)
 
-    retornoMensagensChats = leitura_arquivos.get_dados_chats_mensagens()
-    retornoMensagensDiretas = leitura_arquivos.get_dados_mensagens_diretas()
-    retornoMensagensPostsForuns = leitura_arquivos.get_dados_posts()
+        leitura_arquivos = LeituraCsvs()
 
-    #Preparação Dados para análise
-    funcoes_auxiliares.grava_csv_unico(retornoMensagensChats.loc[:].values, retornoMensagensDiretas.loc[:].values, retornoMensagensPostsForuns.loc[:].values)
+        retornoMensagensChats = leitura_arquivos.get_dados_chats_mensagens()
+        retornoMensagensDiretas = leitura_arquivos.get_dados_mensagens_diretas()
+        retornoMensagensPostsForuns = leitura_arquivos.get_dados_posts()
 
-    retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
+        #Preparação Dados para análise
+        funcoes_auxiliares.grava_csv_unico(retornoMensagensChats.loc[:].values, retornoMensagensDiretas.loc[:].values, retornoMensagensPostsForuns.loc[:].values)
 
-    #start = timeit.default_timer()
+        retornoMensagens = pd.read_csv('./data/dados_mensagens.csv', sep='-')
 
-    analises_resultados = AnalisesResultados()
-    analises_resultados.analise_metricas(retornoMensagens.loc[:].values)  #Problema de demora ta aqui, 46 segundos no curso de Excell
+        #start = timeit.default_timer()
 
-    #end = timeit.default_timer()
+        analises_resultados = AnalisesResultados()
+        analises_resultados.analise_metricas(retornoMensagens.loc[:].values)  #Problema de demora ta aqui, 46 segundos no curso de Excell
 
-    #print('TESTEEEEEE: ' + str(end-start))
+        #end = timeit.default_timer()
 
-    graficos_resultados = GraficosMetricas()
-    graficos_resultados.prepara_dados_gerais_graficos()
+        #print('TESTEEEEEE: ' + str(end-start))
 
-    funcoes_auxiliares = FuncoesAuxiliares()
-    funcoes_auxiliares.deleta_arquivos_auxiliares()
+        port += 1
+        graficos_resultados = GraficosMetricas()
+        graficos_resultados.prepara_dados_gerais_graficos(port)
+
+        funcoes_auxiliares = FuncoesAuxiliares()
+        funcoes_auxiliares.deleta_arquivos_auxiliares()
+
+    exit()

@@ -376,7 +376,7 @@ class GraficosMetricas():
 
         return df_relatorio_geral
 
-    def prepara_dados_gerais_graficos(self):
+    def prepara_dados_gerais_graficos(self, port):
         df = pd.read_csv('./data/dados_metricas_finais.csv', sep='-', index_col=False)
 
         df = self.formata_data_data_frame(df)
@@ -473,9 +473,9 @@ class GraficosMetricas():
 
         self.b_clicou_ultimo_grafico = False
 
-        self.inicializa_graficos(df, dataInicial, dataFinal, df_combos, df_combos_relatorio_geral, df_relatorio_geral)
+        self.inicializa_graficos(df, dataInicial, dataFinal, df_combos, df_combos_relatorio_geral, df_relatorio_geral, port)
 
-    def inicializa_graficos(self, df, dataInicial, dataFinal, df_combos, df_combos_relatorio_geral, df_relatorio_geral):
+    def inicializa_graficos(self, df, dataInicial, dataFinal, df_combos, df_combos_relatorio_geral, df_relatorio_geral, port):
         app = dash.Dash(
             __name__,external_stylesheets=['https://use.fontawesome.com/releases/v5.7.2/css/all.css'],
 
@@ -954,7 +954,7 @@ class GraficosMetricas():
                         dff_aux_alunos = vet_bool
 
             filtraPelaColuna = nrc_emotion
-            if filtraPelaColuna != '':
+            if filtraPelaColuna != '' and (not df.empty):
                 df_date = pd.DataFrame()
                 df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
                 df_date = df_date.sort_values(by=['data'])
@@ -963,7 +963,7 @@ class GraficosMetricas():
                     dff=df[dff_aux_alunos & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
                 else:
                     dff=df[dff_aux_alunos & (df['TEM_' + nrc_emotion.upper()]==nrc_emotion) & (df_date['data'] >= start_date) & (df_date['data'] <= end_date)]
-
+                
                 b_mostra_legenda = True
                 if filtraPelaColuna in dff.columns:
                     dff = dff[dff[filtraPelaColuna].notnull()]
@@ -1012,23 +1012,18 @@ class GraficosMetricas():
                     df_filtrado_data_procurada = df_filtrado_data_procurada.sort_values(by=filtraPelaColuna, ascending=False)
 
                     for i, data_df in enumerate(df_filtrado_data_procurada['data'].values):
-                        #for data_mensagem_procurada in vet_datas_mensagens_procuradas:
-                        #if data_mensagens_procuradas == data_df:
                         if df_filtrado_data_procurada['mensagem'].values[i] not in vet_mensagens_verificadas:
                             vet_alunos_mensagens_verificadas.append(df_filtrado_data_procurada['idUsuario'].values[i])
                             vet_mensagens_verificadas.append(df_filtrado_data_procurada['mensagem'].values[i])
                             
                             classificacoes = df_filtrado_data_procurada['classificacao'].values[i].split(',')
                             gStringClassificacao = ''
-                            #b_tem_classificacao = False
                             for j in range(len(classificacoes)):
                                 classificacao = classificacoes[j][1:].replace("'", "").upper()
                                 if(classificacao != ']'):
-                                    #b_tem_classificacao = True
                                     gStringClassificacao += '[' + classificacao.replace(']','') + ']'
 
                             if len(vet_mensagens_verificadas) > 1:
-                                #if b_tem_classificacao:
                                 gCabecalhoTexto += '&nbsp;&nbsp;' + 'ALUNO ' + str(df_filtrado_data_procurada['idUsuario'].values[i]) + ': ' #' ' + gStringClassificacao +
                             else:
                                 gCabecalhoTexto += 'ALUNO ' + str(df_filtrado_data_procurada['idUsuario'].values[i]) + ': '
@@ -1037,11 +1032,9 @@ class GraficosMetricas():
                                 gValorTexto += '&nbsp;&nbsp;' + df_filtrado_data_procurada['mensagem'].values[i] 
                             else:
                                 gValorTexto += df_filtrado_data_procurada['mensagem'].values[i]
-                            #
           
                 corClassificacao = ''
                 indices_adicionados_classificacao_children = []
-                #dict_divs = defaultdict(list)
 
                 if gStringClassificacao != '':
                     vetClassificacao = gStringClassificacao.split(']')
@@ -1242,6 +1235,9 @@ class GraficosMetricas():
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        webbrowser.open('http://127.0.0.1:8050')
-        app.run_server(debug=False)
+        print('\033[93m Pressione CTRL+C para selecionar outra disciplina \033[0m')
+
+        webbrowser.open('http://127.0.0.1:' + str(port))
+        app.run(host="127.0.0.1", port=str(port), debug=False)
+        
 

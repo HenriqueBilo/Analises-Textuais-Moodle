@@ -57,7 +57,7 @@ class GooglePerspectiveApi():
                     lock.acquire()
                     dict_metricas[indice_frase] = valores_concatenados
                     self.contador_global += 1
-                    self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Complementando a análise')
+                    self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Agregando')
                     lock.release()
                     
                     break
@@ -79,7 +79,7 @@ class GooglePerspectiveApi():
                 lock.acquire()
                 dict_metricas[indice_frase] = valores_concatenados
                 self.contador_global += 1
-                self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Complementando a análise')
+                self.funcoes_auxiliares.barra_progresso(self.contador_global, self.tamanho_mensanges, 'Agregando')
                 lock.release()
                 
                 break
