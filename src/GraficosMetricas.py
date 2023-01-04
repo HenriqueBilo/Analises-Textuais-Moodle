@@ -1235,7 +1235,7 @@ class GraficosMetricas():
 
         log = logging.getLogger('werkzeug')
         log.setLevel(logging.ERROR)
-        print('\033[93m Pressione CTRL+C para selecionar outra disciplina \033[0m')
+        print('\nPressione CTRL+C para selecionar outra disciplina\n')
 
         webbrowser.open('http://127.0.0.1:' + str(port))
         app.run(host="127.0.0.1", port=str(port), debug=False)
