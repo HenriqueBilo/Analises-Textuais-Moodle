@@ -35,7 +35,7 @@ class GooglePerspectiveApi():
                     response_dict = json.loads(response.content)
 
                     valor_profanidade = response_dict['attributeScores']['PROFANITY']['summaryScore']['value']
-                    valor_toxicidade_grave = response_dict['attributeScores']['SEVERE_TOXICITY']['summaryScore']['value']
+                    valor_toxicidade_severa = response_dict['attributeScores']['SEVERE_TOXICITY']['summaryScore']['value']
                     valor_ataque_identidade = response_dict['attributeScores']['IDENTITY_ATTACK']['summaryScore']['value']
                     valor_ameaca = response_dict['attributeScores']['THREAT']['summaryScore']['value']
                     valor_toxicidade = response_dict['attributeScores']['TOXICITY']['summaryScore']['value']
@@ -45,7 +45,7 @@ class GooglePerspectiveApi():
                     valor_media_ataque_identidade_toxicidade = (valor_ataque_identidade + valor_toxicidade) / 2
 
                     valores_concatenados = 'Profanidade:' + str(valor_profanidade) + '*' + \
-                                        'Toxicidade Grave:' + str(valor_toxicidade_grave) + '*' + \
+                                        'Toxicidade Severa:' + str(valor_toxicidade_severa) + '*' + \
                                         'Ataque de Identidade:' + str(valor_ataque_identidade) + '*' + \
                                         'Ameaça:' + str(valor_ameaca) + '*' + \
                                         'Toxicidade:' + str(valor_toxicidade) + '*' + \
@@ -68,10 +68,10 @@ class GooglePerspectiveApi():
                     continue
             else:
                 valores_concatenados = 'Profanidade:' + str(0) + '*' + \
-                                        'toxicidade Grave:' + str(0) + '*' + \
+                                        'Toxicidade Severa:' + str(0) + '*' + \
                                         'Ataque de Identidade:' + str(0) + '*' + \
                                         'Ameaça:' + str(0) + '*' + \
-                                        'toxicidade:' + str(0) + '*' + \
+                                        'Toxicidade:' + str(0) + '*' + \
                                         'Insulto:' + str(0) + '*' + \
                                         'Media_A_I:' + str(0) + '*' + \
                                         'Media_A_T:' + str(0)

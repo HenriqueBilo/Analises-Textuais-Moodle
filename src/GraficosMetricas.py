@@ -104,7 +104,7 @@ class GraficosMetricas():
         return dicionario_retorno
 
     def prepara_df_grafico_relatorio_geral(self, array_alunos_adicionados, aluno, df):
-        array_aluno, array_polaridade, array_profanidade, array_toxicidade_grave = [], [], [], []
+        array_aluno, array_polaridade, array_profanidade, array_toxicidade_severa = [], [], [], []
         array_ataque_de_identidade, array_ameaca, array_toxicidade, array_insulto = [], [], [], []
         array_ansiedade, array_confiança, array_medo, array_raiva = [], [], [], []
         array_tristeza, array_surpresa, array_nojo, array_alegria, array_a_i, array_a_t = [], [], [], [], [], []
@@ -114,7 +114,7 @@ class GraficosMetricas():
         df_aux = df[df['idUsuario'] == aluno]
         media_polaridade_aluno = df_aux['polaridade'].mean()
 
-        media_profanidade, media_toxicidade_grave = df_aux['PROFANIDADE'].mean(),  df_aux['TOXICIDADE_GRAVE'].mean()
+        media_profanidade, media_toxicidade_severa = df_aux['PROFANIDADE'].mean(),  df_aux['TOXICIDADE_SEVERA'].mean()
         media_ataque_de_identidade, media_ameaca = df_aux['ATAQUE_DE_IDENTIDADE'].mean(), df_aux['AMEAÇA'].mean()
         media_toxicidade, media_insulto = df_aux['TOXICIDADE'].mean(), df_aux['INSULTO'].mean()
         media_a_i, media_a_t = df_aux['MEDIA_A_I'].mean(), df_aux['MEDIA_A_T'].mean()
@@ -164,7 +164,7 @@ class GraficosMetricas():
         array_polaridade.append(media_polaridade_aluno)
 
         array_profanidade.append(media_profanidade)
-        array_toxicidade_grave.append(media_toxicidade_grave)
+        array_toxicidade_severa.append(media_toxicidade_severa)
         array_ataque_de_identidade.append(media_ataque_de_identidade)
         array_ameaca.append(media_ameaca)
         array_toxicidade.append(media_toxicidade)
@@ -173,7 +173,7 @@ class GraficosMetricas():
         array_a_i.append(media_a_i)
         array_a_t.append(media_a_t)
 
-        return array_alunos_adicionados, array_polaridade, array_ansiedade, array_confiança, array_medo, array_raiva, array_tristeza, array_nojo, array_alegria, array_profanidade, array_toxicidade_grave, array_ataque_de_identidade, array_ameaca, array_toxicidade, array_insulto, array_a_i, array_a_t
+        return array_alunos_adicionados, array_polaridade, array_ansiedade, array_confiança, array_medo, array_raiva, array_tristeza, array_nojo, array_alegria, array_profanidade, array_toxicidade_severa, array_ataque_de_identidade, array_ameaca, array_toxicidade, array_insulto, array_a_i, array_a_t
 
     def formata_data_data_frame(self, df):
         df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
@@ -229,8 +229,8 @@ class GraficosMetricas():
                 df.at[i,'TEM_TOXICIDADE'] = 'TOXICIDADE'
             if linha.PROFANIDADE != '0':
                 df.at[i,'TEM_PROFANIDADE'] = 'PROFANIDADE'
-            if linha.TOXICIDADE_GRAVE != '0':
-                df.at[i,'TEM_TOXICIDADE_GRAVE'] = 'TOXICIDADE_GRAVE'
+            if linha.TOXICIDADE_SEVERA != '0':
+                df.at[i,'TEM_TOXICIDADE_SEVERA'] = 'TOXICIDADE_SEVERA'
             if linha.ATAQUE_DE_IDENTIDADE != '0':
                 df.at[i,'TEM_ATAQUE_DE_IDENTIDADE'] = 'ATAQUE_DE_IDENTIDADE'
             if linha.INSULTO != '0':
@@ -269,7 +269,7 @@ class GraficosMetricas():
     def prepara_dados_grafico_relatorio_geral(self, data, df):
         df_relatorio_geral = pd.DataFrame()
         array_alunos_adicionados, array_aluno, array_polaridade, array_profanidade = [], [], [], []
-        array_toxicidade_grave, array_ataque_de_identidade, array_ameaca = [], [], []
+        array_toxicidade_severa, array_ataque_de_identidade, array_ameaca = [], [], []
         array_toxicidade, array_insulto, array_ansiedade, array_confiança = [], [], [], []
         array_medo, array_raiva, array_tristeza, array_surpresa = [], [], [], []
         array_nojo, array_alegria, array_a_i, array_a_t = [], [], [], []
@@ -278,7 +278,7 @@ class GraficosMetricas():
 
         for index, aluno in enumerate(df['idUsuario'].values):
             if index == 0:
-                array_alunos_adicionados, array_retorno_polaridade, array_retorno_ansiedade, array_retorno_confiança, array_retorno_medo, array_retorno_raiva, array_retorno_tristeza, array_retorno_nojo, array_retorno_alegria, array_retorno_profanidade, array_retorno_toxicidade_grave, array_retorno_ataque_de_identidade, array_retorno_ameaca, array_retorno_toxicidade, array_retorno_insulto, array_retorno_a_i, array_retorno_a_t = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df)
+                array_alunos_adicionados, array_retorno_polaridade, array_retorno_ansiedade, array_retorno_confiança, array_retorno_medo, array_retorno_raiva, array_retorno_tristeza, array_retorno_nojo, array_retorno_alegria, array_retorno_profanidade, array_retorno_toxicidade_severa, array_retorno_ataque_de_identidade, array_retorno_ameaca, array_retorno_toxicidade, array_retorno_insulto, array_retorno_a_i, array_retorno_a_t = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df)
                 
                 array_aluno.append(count_alunos)
                 count_alunos += 1
@@ -286,7 +286,7 @@ class GraficosMetricas():
                 array_polaridade.extend(array_retorno_polaridade)
 
                 array_profanidade.extend(array_retorno_profanidade)
-                array_toxicidade_grave.extend(array_retorno_toxicidade_grave)
+                array_toxicidade_severa.extend(array_retorno_toxicidade_severa)
                 array_ataque_de_identidade.extend(array_retorno_ataque_de_identidade)
                 array_ameaca.extend(array_retorno_ameaca)
                 array_toxicidade.extend(array_retorno_toxicidade)
@@ -305,7 +305,7 @@ class GraficosMetricas():
                 array_a_t.extend(array_retorno_a_t)
             else:
                 if aluno not in array_alunos_adicionados:
-                    array_alunos_adicionados, array_retorno_polaridade, array_retorno_ansiedade, array_retorno_confiança, array_retorno_medo, array_retorno_raiva, array_retorno_tristeza, array_retorno_nojo, array_retorno_alegria, array_retorno_profanidade, array_retorno_toxicidade_grave, array_retorno_ataque_de_identidade, array_retorno_ameaca, array_retorno_toxicidade, array_retorno_insulto, array_retorno_a_i, array_retorno_a_t = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df)
+                    array_alunos_adicionados, array_retorno_polaridade, array_retorno_ansiedade, array_retorno_confiança, array_retorno_medo, array_retorno_raiva, array_retorno_tristeza, array_retorno_nojo, array_retorno_alegria, array_retorno_profanidade, array_retorno_toxicidade_severa, array_retorno_ataque_de_identidade, array_retorno_ameaca, array_retorno_toxicidade, array_retorno_insulto, array_retorno_a_i, array_retorno_a_t = self.prepara_df_grafico_relatorio_geral(array_alunos_adicionados, aluno, df)
                     
                     array_aluno.append(count_alunos)
                     count_alunos += 1
@@ -313,7 +313,7 @@ class GraficosMetricas():
                     array_polaridade.extend(array_retorno_polaridade)
 
                     array_profanidade.extend(array_retorno_profanidade)
-                    array_toxicidade_grave.extend(array_retorno_toxicidade_grave)
+                    array_toxicidade_severa.extend(array_retorno_toxicidade_severa)
                     array_ataque_de_identidade.extend(array_retorno_ataque_de_identidade)
                     array_ameaca.extend(array_retorno_ameaca)
                     array_toxicidade.extend(array_retorno_toxicidade)
@@ -336,7 +336,7 @@ class GraficosMetricas():
         data['polaridade'] = array_polaridade
 
         data['profanidade'] = array_profanidade
-        data['toxicidade_grave'] = array_toxicidade_grave
+        data['toxicidade_severa'] = array_toxicidade_severa
         data['ataque_de_identidade'] = array_ataque_de_identidade
         data['ameaca'] = array_ameaca
         data['toxicidade'] = array_toxicidade
@@ -359,7 +359,7 @@ class GraficosMetricas():
         df_relatorio_geral['polaridade'] = data['polaridade']
         df_relatorio_geral['profanidade'] = data['profanidade']
         df_relatorio_geral['medo'] = data['medo'] 
-        df_relatorio_geral['toxicidade_grave'] = data['toxicidade_grave']
+        df_relatorio_geral['toxicidade_severa'] = data['toxicidade_severa']
         df_relatorio_geral['nojo'] = data['nojo']
         df_relatorio_geral['ataque_de_id'] = data['ataque_de_identidade']
         df_relatorio_geral['raiva'] = data['raiva'] 
