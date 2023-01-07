@@ -57,7 +57,7 @@ class AnalisesResultados():
         print('Facilidade de leitura da frase "', test_data.text, '": ', teste)
     '''
 
-    def teste(self, frase, indice_frase, dict_emocoes_nrc, lock):
+    def tratamento_thread(self, frase, indice_frase, dict_emocoes_nrc, lock):
         if frase is not np.nan:
             textstat.set_lang('en')
             translator = Translator()
@@ -126,7 +126,7 @@ class AnalisesResultados():
 
             #self.teste(frase, i+1, dict_emocoes_nrc)
 
-            pool.submit(self.teste, frase, i+1, dict_emocoes_nrc, lock) #Primeiro parametro é a função e os outros são os parametros pra função
+            pool.submit(self.tratamento_thread, frase, i+1, dict_emocoes_nrc, lock) #Primeiro parametro é a função e os outros são os parametros pra função
             #time.sleep(0.1)
 
         pool.shutdown(wait=True)

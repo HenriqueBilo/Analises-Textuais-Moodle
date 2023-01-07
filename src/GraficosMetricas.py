@@ -954,6 +954,9 @@ class GraficosMetricas():
                         dff_aux_alunos = vet_bool
 
             filtraPelaColuna = nrc_emotion
+            if filtraPelaColuna == 'POLARIDADE':
+                return '', False, '' 
+
             if filtraPelaColuna != '' and (not df.empty):
                 df_date = pd.DataFrame()
                 df_date['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y')
@@ -988,7 +991,8 @@ class GraficosMetricas():
                                 xaxis={'title':'DATA'},
                                 title={'text':'Visualização Métricas Gerais',
                                 'font':{'size':20},'x':0.5,'xanchor':'center'},
-                                hovermode='x')
+                                hovermode='x',
+                                yaxis_range=[0,1])
 
                 if not b_mostra_legenda:
                     fig.update_layout({
@@ -1215,13 +1219,33 @@ class GraficosMetricas():
 
                 fig = px.bar(dff, x='indiceUsuario', y=filtraPelaColuna,
                             hover_data=['idUsuario'], color=filtraPelaColuna, labels={'indiceUsuario':'USUÁRIO(S)', 
-                            filtraPelaColuna: filtraPelaColuna.upper()}, height=600)
+                            filtraPelaColuna: filtraPelaColuna.upper()}, height=600,
+                            color_continuous_scale=['yellow', 'orange',
+                                         'deeppink', 'purple',
+                                         'blue'])
 
-                fig.update_layout(title_text='Relatório Geral dos Alunos', 
-                            xaxis = dict(
-                                tickmode = 'linear',
-                            ),
-                            title_x=0.5,)
+                if filtraPelaColuna != 'polaridade':
+                    fig.update_layout(title_text='Relatório Geral dos Alunos', 
+                                xaxis = dict(
+                                    tickmode = 'linear',
+                                ),
+                                title_x=0.5,
+                                yaxis_range=[0,1])
+                else:
+                    valor_minimo = dff[filtraPelaColuna].min() 
+                    if float(valor_minimo) < 0:
+                        valor_minimo = valor_minimo - 0.1
+                    else:
+                        valor_minimo = valor_minimo + 0.1
+
+                    valor_maximo = dff[filtraPelaColuna].max() 
+
+                    fig.update_layout(title_text='Relatório Geral dos Alunos', 
+                                xaxis = dict(
+                                    tickmode = 'linear',
+                                ),
+                                title_x=0.5,
+                                yaxis_range=[valor_minimo, valor_maximo + 0.1])
 
                 if clickData is not None:
                     usuario_procurado = clickData['points'][0]['customdata'][0]
